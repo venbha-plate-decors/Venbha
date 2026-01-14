@@ -1,0 +1,49 @@
+/* GalleryPage.css */
+/* Reusing variables and styles from global and other pages */
+
+.gallery-page {
+    min-height: 100vh;
+    padding-bottom: 4rem;
+}
+
+/* Page Header Styles - Consistent with About Page */
+.gallery-page .page-header {
+    background-color: var(--secondary-color);
+    /* Light cream/gold background */
+    padding: 220px 2rem 60px;
+    /* Top padding to account for fixed header */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-title {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.page-title span {
+    color: var(--accent-color, #c2185b);
+    /* Fallback to pinkish accent */
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Ensure the reused Gallery component fits well */
+.gallery-page .gallery-section {
+    padding-top: 4rem;
+    background: transparent;
+}
+
+.gallery-page .gallery-section h2 {
+    display: none;
+    /* Hide the component's internal H2 since we have a page header */
+}

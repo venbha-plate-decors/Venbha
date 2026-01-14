@@ -1,0 +1,206 @@
+/* Admin Login Page Styles */
+.admin-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 20px 60px;
+    position: relative;
+    overflow: hidden;
+    /* Uses the global body gradient, but we can darken or overlay if needed */
+}
+
+/* Background decorations similar to Hero section */
+.blob {
+    position: absolute;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.6;
+}
+
+.blob-1 {
+    top: -10%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #ffe2e2 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.blob-2 {
+    bottom: -10%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #e0f2fe 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.login-container {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.5);
+    width: 100%;
+    max-width: 450px;
+    padding: 50px 40px;
+    position: relative;
+    z-index: 10;
+    border-top: 5px solid #e91e63;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.login-header h2 {
+    font-size: 2.2rem;
+    color: #c2185b;
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.login-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 20px 14px 50px;
+    /* Left padding for icon */
+    border: 2px solid #eee;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ff69b4;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+}
+
+.login-btn {
+    margin-top: 10px;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #e91e63, #c2185b);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(233, 30, 99, 0.2);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(233, 30, 99, 0.3);
+    background: linear-gradient(45deg, #c2185b, #ad1457);
+}
+
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-login-page {
+        padding: 100px 20px 40px;
+        align-items: flex-start;
+        /* Prevent vertical centering on small screens if content is tall */
+    }
+
+    .login-container {
+        padding: 30px 20px;
+        margin-top: 20px;
+    }
+
+    .login-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .blob {
+        opacity: 0.4;
+        /* Fade blobs on mobile to reduce distraction */
+    }
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.toggle-password-btn:hover {
+    color: #e91e63;
+}
+
+/* Ensure input has space for right text */
+.form-group input[type="password"],
+.form-group input[type="text"] {
+    padding-right: 60px;
+}

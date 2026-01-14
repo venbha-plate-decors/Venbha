@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-color: #2c3e50;
+  --accent-color: #e74c3c;
+  --text-color: #333;
+  --bg-color: #fff0f5;
+  /* LavenderBlush - soft pink */
+  --font-main: 'Sen', sans-serif;
+}
+
+*,
+input,
+button,
+textarea,
+select {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Sen', sans-serif;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #ffffff;
+  /* Matching About Us Section Gradient */
+  background-image: linear-gradient(to right, rgba(252, 231, 243, 0.2), rgba(252, 231, 243, 0.6));
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+
+a,
+button,
+.clickable,
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer !important;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}

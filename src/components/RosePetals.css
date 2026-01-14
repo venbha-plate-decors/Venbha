@@ -1,0 +1,50 @@
+.rose-petals-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Allow clicking through */
+    z-index: 0;
+    overflow: hidden;
+}
+
+.petal {
+    position: absolute;
+    top: -10%;
+    width: 20px;
+    height: 20px;
+    background: #ffb7c5;
+    /* Soft pink petal color */
+    border-radius: 100% 0 100% 0;
+    /* Leaf/petal shape */
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+
+/* Add some variation to petals */
+.petal:nth-child(2n) {
+    background: #ffc0cb;
+}
+
+.petal:nth-child(3n) {
+    background: #ff69b4;
+    /* Darker pink */
+}
+
+@keyframes fall {
+    0% {
+        transform: translate(0, -10px) rotate(0deg) skewX(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(100px, 110vh) rotate(720deg) skewX(20deg);
+        opacity: 0;
+    }
+}

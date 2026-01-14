@@ -1,0 +1,5 @@
+/* Global App Styles */
+/* Most styles are in index.css or component specific files */
+.App {
+  min-height: 100vh;
+}

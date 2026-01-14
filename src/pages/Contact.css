@@ -1,0 +1,309 @@
+/* Contact Page Styles */
+.contact-page {
+    padding-top: 100px;
+    /* Space for fixed header */
+    min-height: 100vh;
+    padding-bottom: 50px;
+    background: transparent;
+    /* Background handled by body gradient */
+}
+
+.page-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    margin-bottom: 40px;
+}
+
+.page-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.page-title span {
+    background: linear-gradient(45deg, #e91e63, #c2185b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.contact-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 50px;
+    align-items: flex-start;
+}
+
+/* Contact Info Column */
+.contact-info {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.info-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #fff0f5 0%, #ffcdd2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #e91e63;
+    flex-shrink: 0;
+    box-shadow: 0 5px 15px rgba(233, 30, 99, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.info-item:hover .info-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.info-details h3 {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.info-details p,
+.info-details a {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.info-details a:hover {
+    color: #e91e63;
+}
+
+/* Form Column */
+.contact-form-wrapper {
+    flex: 1.2;
+    background: #ffffff;
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(233, 30, 99, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-form-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ff69b4, #ff1493);
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #ff69b4;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(233, 30, 99, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(233, 30, 99, 0.4);
+    background: linear-gradient(45deg, #ff1493, #c2185b);
+}
+
+@media (max-width: 968px) {
+    .contact-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .contact-info,
+    .contact-form-wrapper {
+        width: 100%;
+    }
+
+    .page-header {
+        padding: 50px 20px 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 3rem;
+    }
+
+    .contact-info {
+        padding: 30px;
+    }
+
+    .contact-form-wrapper {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-page {
+        padding-top: 80px;
+        /* Adjust for smaller header/nav */
+    }
+
+    .page-header {
+        padding: 30px 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .contact-container {
+        padding: 0 15px;
+        gap: 30px;
+    }
+
+    .contact-info {
+        padding: 25px 20px;
+    }
+
+    .info-item {
+        flex-direction: column;
+        /* Stack icon and text on very small screens */
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .info-details h3 {
+        margin-bottom: 8px;
+    }
+
+    .contact-form-wrapper {
+        padding: 25px 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .submit-btn {
+        padding: 14px;
+        font-size: 1rem;
+    }
+}
+
+/* Success Message Inline Styles */
+.success-message-inline {
+    text-align: center;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+}
+
+.success-message-inline .success-icon {
+    font-size: 4rem;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    background: #fff0f5;
+    border-radius: 50%;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-message-inline h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: 800;
+}
+
+.success-message-inline p {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 80%;
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Contact.css';
 
@@ -38,6 +39,10 @@ const Contact = () => {
 
     return (
         <div className="contact-page">
+            <Helmet>
+                <title>Contact Us | Venbha Plate Decors</title>
+                <meta name="description" content="Get in touch with Venbha Plate Decors for bookings, inquiries, or customized plate decoration services. We are here to make your event special." />
+            </Helmet>
             <motion.header
                 className="page-header"
                 initial={{ opacity: 0, y: -20 }}

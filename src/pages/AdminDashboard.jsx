@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -26,6 +27,9 @@ const AdminDashboard = () => {
 
     return (
         <div className={`admin-dashboard ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+            <Helmet>
+                <title>Admin Dashboard | Venbha Plate Decors</title>
+            </Helmet>
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>

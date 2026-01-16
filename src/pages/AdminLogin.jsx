@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -36,6 +37,9 @@ const AdminLogin = () => {
 
     return (
         <div className="admin-login-page">
+            <Helmet>
+                <title>Admin Login | Venbha Plate Decors</title>
+            </Helmet>
             {/* Background elements */}
             <div className="blob blob-1"></div>
             <div className="blob blob-2"></div>

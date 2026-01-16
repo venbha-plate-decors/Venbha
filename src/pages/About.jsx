@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import './About.css';
 import aboutStory from '../assets/about_story.png';
 import aboutMission from '../assets/about_mission.png';
@@ -11,6 +12,10 @@ const About = () => {
 
     return (
         <div className="about-page">
+            <Helmet>
+                <title>About Us | Venbha Plate Decors - Creating Memories</title>
+                <meta name="description" content="Learn more about Venbha Plate Decors. We blend tradition with creativity to craft stunning plate decorations for your most cherished moments." />
+            </Helmet>
             <header className="page-header">
                 <h1 className="page-title">About <span>Venbha</span></h1>
                 <p className="page-subtitle">Where tradition meets creativity in every plate.</p>

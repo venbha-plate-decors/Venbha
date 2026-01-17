@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import RosePetals from './components/RosePetals';
-import Home from './pages/Home';
-import Designs from './pages/Designs';
-import Gallery from './pages/Gallery';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Blogs from './pages/Blogs';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
+import Loading from './components/Loading';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
+
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const Designs = lazy(() => import('./pages/Designs'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Blogs = lazy(() => import('./pages/Blogs'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 const PublicLayout = () => {
   return (
@@ -26,27 +30,29 @@ const PublicLayout = () => {
   );
 };
 
-import ScrollToTop from './components/ScrollToTop';
+
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/collections" element={<Designs />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/blogs" element={<Blogs />} />
-        </Route>
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/collections" element={<Designs />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/blogs" element={<Blogs />} />
+          </Route>
 
-        {/* Admin Routes - No Header/Footer */}
-        <Route path="/admin_login" element={<AdminLogin />} />
-        <Route path="/admin_dashboard" element={<AdminDashboard />} />
-      </Routes>
+          {/* Admin Routes - No Header/Footer */}
+          <Route path="/admin_login" element={<AdminLogin />} />
+          <Route path="/admin_dashboard" element={<AdminDashboard />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

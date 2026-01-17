@@ -6,7 +6,16 @@ import './AdminDashboard.css';
 
 const AdminDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('dashboard');
+
+    // Initialize activeTab from localStorage or default to 'dashboard'
+    const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('adminActiveTab') || 'dashboard';
+    });
+
+    // Save activeTab to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('adminActiveTab', activeTab);
+    }, [activeTab]);
 
     // Gallery State
     const [galleryImages, setGalleryImages] = useState([]);
@@ -33,6 +42,14 @@ const AdminDashboard = () => {
     const [popupMessage, setPopupMessage] = useState('');
 
     const closePopup = () => setShowPopup(false);
+
+    // Dummy Contact Entries State
+    const [contactEntries, setContactEntries] = useState([
+        { id: 1, name: 'John Doe', email: 'john@example.com', phone: '123-456-7890', message: 'Interested in wedding decor packages.', date: '2024-01-15', status: 'New' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '987-654-3210', message: 'Do you provide plate decoration services?', date: '2024-01-14', status: 'Read' },
+        { id: 3, name: 'Alice Brown', email: 'alice@example.com', phone: '555-123-4567', message: 'Inquiry about bulk orders.', date: '2024-01-12', status: 'Replied' },
+    ]);
+
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -300,8 +317,101 @@ const AdminDashboard = () => {
                 </div>
             </motion.div>
 
-
+            {/* Dashboard Cards Grid */}
+            <motion.div
+                className="stats-grid"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+            >
+                <motion.div className="stat-card" variants={itemVariants}>
+                    <div className="stat-info">
+                        <h3>Contact Inquiries</h3>
+                        <p className="stat-value">{contactEntries.length}</p>
+                        <span className="stat-change">New messages</span>
+                        <button
+                            className="btn-primary"
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', marginTop: '10px', height: 'auto' }}
+                            onClick={() => setActiveTab('contact-inquiries')}
+                        >
+                            View
+                        </button>
+                    </div>
+                    <div className="stat-icon users">✉️</div>
+                </motion.div>
+            </motion.div>
         </>
+    );
+
+    const renderContactInquiries = () => (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="gallery-manager"
+        >
+            <div className="dashboard-header">
+                <div className="header-left">
+                    <button className="menu-toggle-btn" onClick={toggleSidebar}>
+                        ☰
+                    </button>
+                    <div className="header-title">
+                        <h1>Contact Inquiries</h1>
+                        <p>View and manage messages from the contact form.</p>
+                    </div>
+                </div>
+                <div className="header-actions">
+                    <button
+                        className="btn-secondary"
+                        onClick={() => setActiveTab('dashboard')}
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <motion.div
+                className="recent-orders"
+                variants={itemVariants}
+                initial="hidden"
+                animate="show"
+            >
+                <div className="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {contactEntries.map((entry) => (
+                                <tr key={entry.id}>
+                                    <td>{entry.name}</td>
+                                    <td>{entry.email}</td>
+                                    <td>{entry.phone}</td>
+                                    <td>{entry.message}</td>
+                                    <td>{entry.date}</td>
+                                    <td>
+                                        <span className={`status-badge status ${entry.status.toLowerCase()}`}>
+                                            {entry.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                            {contactEntries.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: 'center' }}>No inquiries found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </motion.div>
+        </motion.div>
     );
 
     // Drag and Drop Refs
@@ -713,6 +823,7 @@ const AdminDashboard = () => {
 
             <main className="dashboard-main">
                 {activeTab === 'dashboard' && renderDashboardContent()}
+                {activeTab === 'contact-inquiries' && renderContactInquiries()}
                 {activeTab === 'gallery' && renderGalleryContent()}
                 {activeTab === 'home-gallery' && renderHomeGalleryContent()}
                 {activeTab === 'collections' && <div className="placeholder-tab">Collections Management Coming Soon</div>}

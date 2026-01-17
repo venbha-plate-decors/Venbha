@@ -59,3 +59,50 @@ img {
   margin: 0 auto;
   padding: 0 20px;
 }
+
+/* Global Cursor Override: Remove 'type symbol' (I-beam) from text */
+*,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+div,
+img,
+svg {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Ensure text inputs still show the typing cursor */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+textarea {
+  cursor: text !important;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Ensure interactive elements show pointer (already covered partly above but reinforcing) */
+a,
+button,
+label,
+select,
+.clickable,
+input[type="submit"],
+input[type="button"],
+input[type="file"]::file-selector-button {
+  cursor: pointer !important;
+}

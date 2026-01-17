@@ -10,7 +10,7 @@
 .gallery-page .page-header {
     background-color: var(--secondary-color);
     /* Light cream/gold background */
-    padding: 220px 2rem 60px;
+    padding: 220px 2rem 20px;
     /* Top padding to account for fixed header */
     text-align: center;
     position: relative;
@@ -39,7 +39,7 @@
 
 /* Ensure the reused Gallery component fits well */
 .gallery-page .gallery-section {
-    padding-top: 4rem;
+    padding-top: 0;
     background: transparent;
 }
 

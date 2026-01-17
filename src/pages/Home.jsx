@@ -13,7 +13,7 @@ const Home = () => {
             </Helmet>
             <Hero />
             <AboutSection />
-            <Gallery />
+            <Gallery storageKey="homeGalleryImages" showPhotosTitle={false} />
         </>
     );
 };

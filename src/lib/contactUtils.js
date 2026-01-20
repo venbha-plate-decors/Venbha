@@ -59,44 +59,32 @@ export const addContactEntry = async (entryData) => {
 
         console.log('Successfully inserted into database:', data);
 
-        // Send email notification using Web3Forms
+        // Send email notification using Formsubmit.co
         try {
-            const emailData = {
-                access_key: "YOUR_WEB3FORMS_ACCESS_KEY", // Replace with actual key
-                subject: `New Contact Form Submission from ${entryData.name}`,
-                from_name: "Venbha Plate Decors Website",
-                to_email: "kvsnavee@gmail.com",
-                message: `
-New Contact Form Submission:
+            const emailData = new FormData();
+            emailData.append('_subject', `New Contact Form Submission from ${entryData.name}`);
+            emailData.append('name', entryData.name);
+            emailData.append('email', entryData.email);
+            emailData.append('phone', entryData.phone);
+            emailData.append('message', entryData.message);
+            emailData.append('_template', 'table'); // Use table template for better formatting
+            emailData.append('_captcha', 'false'); // Disable captcha for seamless experience
 
-Name: ${entryData.name}
-Email: ${entryData.email}
-Phone: ${entryData.phone}
-
-Message:
-${entryData.message}
-
----
-Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                `.trim()
-            };
-
-            const emailResponse = await fetch('https://api.web3forms.com/submit', {
+            const emailResponse = await fetch('https://formsubmit.co/kvsnavee@gmail.com', {
                 method: 'POST',
+                body: emailData,
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
-                body: JSON.stringify(emailData)
+                }
             });
 
             const emailResult = await emailResponse.json();
 
-            if (!emailResult.success) {
+            if (!emailResponse.ok) {
                 console.warn('Email notification failed:', emailResult);
                 // Don't fail the whole operation if email fails
             } else {
-                console.log('Email notification sent successfully');
+                console.log('Email notification sent successfully via Formsubmit.co');
             }
         } catch (emailError) {
             console.warn('Email notification error:', emailError);
@@ -156,6 +144,31 @@ export const updateContactNotes = async (id, notes) => {
         return { success: true };
     } catch (error) {
         console.error('Update notes error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Update contact entry workflow status
+ * @param {string} id - Entry ID
+ * @param {string} workflowStatus - New workflow status
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const updateContactWorkflowStatus = async (id, workflowStatus) => {
+    try {
+        const { error } = await supabase
+            .from('contact_entries')
+            .update({ workflow_status: workflowStatus })
+            .eq('id', id);
+
+        if (error) {
+            console.error('Update workflow status error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Update workflow status error:', error);
         return { success: false, error };
     }
 };

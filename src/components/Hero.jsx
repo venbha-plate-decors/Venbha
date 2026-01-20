@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './Hero.css';
 import heroVideo from '../assets/hero_video.mp4';
 
+import heroBanner from '../assets/hero_banner.jpg';
+
 const Hero = () => {
+    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -24,9 +29,28 @@ const Hero = () => {
     return (
         <section className="hero-section" id="home">
             {/* Full Background Video */}
-            <video className="hero-bg-video" autoPlay loop muted playsInline>
+            <video
+                className="hero-bg-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+                onLoadedData={() => setIsVideoLoaded(true)}
+                poster={heroBanner}
+            >
                 <source src={heroVideo} type="video/mp4" />
             </video>
+
+            {/* Fallback/Loading Image Overlay */}
+            <motion.img
+                src={heroBanner}
+                className="hero-bg-video"
+                aria-hidden="true"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: isVideoLoaded ? 0 : 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ zIndex: 0, objectFit: 'cover' }}
+            />
 
             {/* Gradient Overlay for Text Readability */}
             <div className="hero-overlay"></div>

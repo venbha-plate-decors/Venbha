@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadImageToStorage, uploadVideoToStorage, deleteImageFromStorage } from '../lib/storageUtils';
 import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder } from '../lib/databaseUtils';
-import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry } from '../lib/contactUtils';
+import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -111,6 +111,25 @@ const AdminDashboard = () => {
     const handleDeleteContact = (id) => {
         setDeleteItem({ id, handler: 'contact' });
         setShowDeleteConfirm(true);
+    };
+
+
+    const handleWorkflowStatusChange = async (id, newStatus) => {
+        // Allow empty string (Select option) to update database to NULL
+        const result = await updateContactWorkflowStatus(id, newStatus === '' ? null : newStatus);
+
+        if (result.success) {
+            // Update local state
+            setContactEntries(prev => prev.map(entry =>
+                entry.id === id ? { ...entry, workflow_status: newStatus === '' ? null : newStatus } : entry
+            ));
+            setPopupMessage('Status updated successfully!');
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 2000);
+        } else {
+            setPopupMessage('Failed to update status');
+            setShowPopup(true);
+        }
     };
 
 
@@ -661,23 +680,24 @@ const AdminDashboard = () => {
                                 <th>Date</th>
                                 <th>Notes</th>
                                 <th>Actions</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {contactEntries.map((entry) => (
                                 <tr key={entry.id}>
-                                    <td>{entry.name}</td>
-                                    <td>{entry.email}</td>
-                                    <td>{entry.phone}</td>
-                                    <td style={{ maxWidth: '300px', whiteSpace: 'normal' }}>{entry.message}</td>
-                                    <td>{new Date(entry.created_at).toLocaleDateString('en-IN', {
+                                    <td data-label="Name">{entry.name}</td>
+                                    <td data-label="Email">{entry.email}</td>
+                                    <td data-label="Phone">{entry.phone}</td>
+                                    <td data-label="Message" style={{ maxWidth: '300px', whiteSpace: 'normal' }}>{entry.message}</td>
+                                    <td data-label="Date">{new Date(entry.created_at).toLocaleDateString('en-IN', {
                                         year: 'numeric',
                                         month: 'short',
                                         day: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}</td>
-                                    <td>
+                                    <td data-label="Notes">
                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                             {entry.notes ? (
                                                 <button
@@ -698,7 +718,7 @@ const AdminDashboard = () => {
                                             )}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <a
                                                 href={`tel:${entry.phone}`}
@@ -719,15 +739,29 @@ const AdminDashboard = () => {
                                                 onClick={() => handleDeleteContact(entry.id)}
                                                 title="Delete"
                                             >
-                                                ✕
+                                                🗑
                                             </button>
                                         </div>
+                                    </td>
+                                    <td data-label="Status">
+                                        <select
+                                            className="status-dropdown"
+                                            value={entry.workflow_status || ''}
+                                            onChange={(e) => handleWorkflowStatusChange(entry.id, e.target.value)}
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="need_to_call">Need to call</option>
+                                            <option value="need_to_share_pictures">Need to Share the pictures</option>
+                                            <option value="waiting_for_confirmation">Waiting for confirmation</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
                                     </td>
                                 </tr>
                             ))}
                             {contactEntries.length === 0 && (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center' }}>No enquiries found.</td>
+                                    <td colSpan="8" style={{ textAlign: 'center' }}>No enquiries found.</td>
                                 </tr>
                             )}
                         </tbody>

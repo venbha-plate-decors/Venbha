@@ -511,6 +511,65 @@ td {
     line-height: 1.6;
 }
 
+/* Status Dropdown */
+.status-dropdown {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background-color: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    font-weight: 500;
+}
+
+.status-dropdown:hover {
+    border-color: var(--admin-primary);
+    box-shadow: 0 2px 8px rgba(190, 24, 93, 0.1);
+}
+
+.status-dropdown:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
+}
+
+/* Color-coded status options */
+.status-dropdown option[value=""] {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.status-dropdown option[value="need_to_call"] {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-dropdown option[value="need_to_share_pictures"] {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-dropdown option[value="waiting_for_confirmation"] {
+    background-color: #fce7f3;
+    color: #9f1239;
+}
+
+.status-dropdown option[value="approved"] {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-dropdown option[value="rejected"] {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+
 
 /* Responsive */
 /* Responsive & Mobile Styles */
@@ -708,8 +767,98 @@ td {
         /* Remove desktop fix */
         margin-top: 15px;
         /* Add spacing from input */
-        width: 100%;
         /* Full width button looks better on mobile */
+    }
+
+    /* Responsive Table Transformation */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+        display: block;
+    }
+
+    /* Hide table headers (but not display:none for accessibility) */
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        margin-bottom: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+        padding: 0.5rem 0;
+    }
+
+    td {
+        /* Behave like a "row" */
+        border: none;
+        border-bottom: 1px solid #f9fafb;
+        position: relative;
+        padding: 0.8rem 1.5rem;
+        text-align: right;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 48px;
+    }
+
+    td::before {
+        /* Label becomes a flex item on the left */
+        position: static;
+        transform: none;
+        width: auto;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+        content: attr(data-label);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    td:last-child {
+        border-bottom: none;
+        padding-bottom: 1rem;
+    }
+
+    /* Handle long text in message - Display label on left and content on right */
+    td[data-label="Message"] {
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: right;
+        gap: 0.5rem;
+    }
+
+    td[data-label="Message"]::before {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    /* Action buttons alignment */
+    td[data-label="Actions"]>div,
+    td[data-label="Notes"]>div {
+        justify-content: flex-end;
+        /* No width: 100% needed with space-between */
+    }
+
+    /* Status dropdown mobile styling */
+    td[data-label="Status"] {
+        align-items: flex-start;
+    }
+
+    td[data-label="Status"] .status-dropdown {
+        min-width: auto;
+        width: 100%;
+        max-width: 250px;
     }
 }
 

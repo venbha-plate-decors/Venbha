@@ -74,10 +74,6 @@ div,
 img,
 svg {
   cursor: default;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 /* Ensure text inputs still show the typing cursor */

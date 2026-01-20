@@ -54,8 +54,8 @@
 .login-header {
     text-align: center;
     margin-bottom: 40px;
-    user-select: none;
     cursor: default;
+
 }
 
 .login-header h2 {
@@ -82,8 +82,8 @@
     color: #333;
     font-weight: 600;
     font-size: 0.95rem;
-    user-select: none;
     cursor: default;
+
 }
 
 .input-wrapper {

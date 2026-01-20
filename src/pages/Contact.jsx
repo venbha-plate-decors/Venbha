@@ -2,11 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
+import { addContactEntry } from '../lib/contactUtils';
 import './Contact.css';
 
 const Contact = () => {
     const location = useLocation();
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+    });
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -19,6 +27,35 @@ const Contact = () => {
             window.history.replaceState({}, '', '/contact');
         }
     }, [location]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const result = await addContactEntry(formData);
+
+            if (result.success) {
+                setShowSuccess(true);
+                setFormData({ name: '', email: '', phone: '', message: '' });
+            } else {
+                alert('Failed to send message. Please try again or contact us directly.');
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -144,21 +181,11 @@ const Contact = () => {
                             <motion.form
                                 key="contact-form"
                                 className="contact-form"
-                                action="https://formsubmit.co/kvsnavee@gmail.com"
-                                method="POST"
+                                onSubmit={handleSubmit}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                             >
-                                {/* Honeypot for spammers */}
-                                <input type="text" name="_honey" style={{ display: 'none' }} />
-
-                                {/* Disable Captcha for smoother experience (optional) */}
-                                <input type="hidden" name="_captcha" value="false" />
-
-                                {/* Success page (redirects back to home for now, or could include a query param) */}
-                                <input type="hidden" name="_next" value={`${window.location.origin}/contact?success=true`} />
-
                                 <div className="form-group">
                                     <label htmlFor="name" className="form-label">Full Name</label>
                                     <input
@@ -167,6 +194,8 @@ const Contact = () => {
                                         id="name"
                                         className="form-input"
                                         placeholder="e.g. Priyadharshini"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
                                         required
                                     />
                                 </div>
@@ -179,6 +208,8 @@ const Contact = () => {
                                         id="phone"
                                         className="form-input"
                                         placeholder="Your 10-digit mobile number"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
                                         required
                                     />
                                 </div>
@@ -191,6 +222,8 @@ const Contact = () => {
                                         id="email"
                                         className="form-input"
                                         placeholder="name@example.com"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
                                         required
                                     />
                                 </div>
@@ -202,6 +235,8 @@ const Contact = () => {
                                         id="message"
                                         className="form-textarea"
                                         placeholder="Tell us about your event, theme, and date..."
+                                        value={formData.message}
+                                        onChange={handleInputChange}
                                         required
                                     ></textarea>
                                 </div>
@@ -209,10 +244,11 @@ const Contact = () => {
                                 <motion.button
                                     type="submit"
                                     className="submit-btn"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    disabled={isSubmitting}
+                                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                                 >
-                                    Send Message
+                                    {isSubmitting ? 'Sending...' : 'Send Message'}
                                 </motion.button>
                             </motion.form>
                         )}

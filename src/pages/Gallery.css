@@ -2,31 +2,31 @@
 /* Reusing variables and styles from global and other pages */
 
 .gallery-page {
+    padding-top: 100px;
     min-height: 100vh;
     padding-bottom: 4rem;
 }
 
 /* Page Header Styles - Consistent with About Page */
 .gallery-page .page-header {
-    background-color: var(--secondary-color);
-    /* Light cream/gold background */
-    padding: 220px 2rem 20px;
-    /* Top padding to account for fixed header */
     text-align: center;
-    position: relative;
-    overflow: hidden;
+    padding: 80px 20px;
+    background: transparent;
+    margin-bottom: 60px;
 }
 
 .page-title {
-    font-size: 3rem;
+    font-size: 3.5rem;
+    font-weight: 800;
     color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-weight: 700;
+    margin-bottom: 15px;
 }
 
 .page-title span {
-    color: var(--accent-color, #c2185b);
-    /* Fallback to pinkish accent */
+    background: linear-gradient(45deg, #e91e63, #c2185b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .page-subtitle {
@@ -34,7 +34,6 @@
     color: #666;
     max-width: 600px;
     margin: 0 auto;
-    line-height: 1.6;
 }
 
 /* Ensure the reused Gallery component fits well */
@@ -46,4 +45,16 @@
 .gallery-page .gallery-section h2 {
     display: none;
     /* Hide the component's internal H2 since we have a page header */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2.5rem;
+    }
+
+    .gallery-page .page-header {
+        padding: 60px 20px;
+        margin-bottom: 40px;
+    }
 }

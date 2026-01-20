@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useAuth } from '../contexts/AuthContext';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -11,28 +12,50 @@ const AdminLogin = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
 
-    // For demonstration, simply redirect on 'success'
     const navigate = useNavigate();
+    const { signIn, user } = useAuth();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            navigate('/admin_dashboard');
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear error when user starts typing
+        if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const { data, error: signInError } = await signIn(formData.email, formData.password);
+
+            if (signInError) {
+                setError(signInError.message || 'Invalid email or password');
+                setIsLoading(false);
+                return;
+            }
+
+            if (data.user) {
+                // Successfully logged in, navigation will happen via useEffect
+                console.log('Login successful:', data.user);
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('An unexpected error occurred. Please try again.');
             setIsLoading(false);
-            console.log('Login attempt:', formData);
-            // Bypass authentication as requested
-            navigate('/admin_dashboard');
-        }, 1000);
+        }
     };
 
     return (
@@ -55,6 +78,25 @@ const AdminLogin = () => {
                     <p>Welcome back! Please access the dashboard.</p>
                 </div>
 
+                {error && (
+                    <motion.div
+                        className="error-message"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{
+                            backgroundColor: '#fee',
+                            color: '#c33',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            marginBottom: '20px',
+                            textAlign: 'center',
+                            border: '1px solid #fcc'
+                        }}
+                    >
+                        {error}
+                    </motion.div>
+                )}
+
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
                         <label htmlFor="email">Email Address</label>
@@ -67,6 +109,7 @@ const AdminLogin = () => {
                                 placeholder="admin@venbha.com"
                                 value={formData.email}
                                 onChange={handleChange}
+                                required
                             />
                         </div>
                     </div>
@@ -82,6 +125,7 @@ const AdminLogin = () => {
                                 placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
+                                required
                             />
                             <button
                                 type="button"

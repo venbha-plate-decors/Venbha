@@ -129,10 +129,10 @@
     }
 
     .about-text {
-        text-align: justify;
-        text-align-last: left;
+        text-align: center;
+        /* create natural spacing by removing justify */
+        word-spacing: normal;
         hyphens: none;
-        /* Prevent words from breaking/hyphenating */
     }
 
     .features-list {

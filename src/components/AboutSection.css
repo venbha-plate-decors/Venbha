@@ -78,8 +78,8 @@
     color: #666;
     margin-bottom: 20px;
     line-height: 1.8;
-    text-align: left;
-    /* Changed from justify to left for better spacing */
+    text-align: justify;
+    /* Justify text on desktop for neat edges */
 }
 
 .features-list {

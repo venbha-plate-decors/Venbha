@@ -5,7 +5,7 @@ import { DownloadIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadImageToStorage, uploadVideoToStorage, deleteImageFromStorage } from '../lib/storageUtils';
-import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder } from '../lib/databaseUtils';
+import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import './AdminDashboard.css';
 
@@ -68,6 +68,9 @@ const AdminDashboard = () => {
     const [galleryImages, setGalleryImages] = useState([]);
     const [galleryVideos, setGalleryVideos] = useState([]);
     const [homeGalleryImages, setHomeGalleryImages] = useState([]);
+    const [collections, setCollections] = useState([]);
+    const [collectionForm, setCollectionForm] = useState({ name: '', image: null });
+    const [isSubmittingCollection, setIsSubmittingCollection] = useState(false);
     const [uploadType, setUploadType] = useState('image'); // 'image' or 'video'
 
     const [isGalleryHovered, setIsGalleryHovered] = useState(false);
@@ -302,6 +305,12 @@ const AdminDashboard = () => {
             if (homeResult.success) {
                 setHomeGalleryImages(homeResult.data);
             }
+
+            // Load collections
+            const collectionsResult = await fetchCollections();
+            if (collectionsResult.success) {
+                setCollections(collectionsResult.data);
+            }
         } catch (error) {
             console.error('Error loading gallery data:', error);
         }
@@ -469,6 +478,24 @@ const AdminDashboard = () => {
                 setPopupMessage('Image deleted successfully!');
                 setShowPopup(true);
                 setTimeout(() => setShowPopup(false), 2000);
+            } else if (deleteItem.handler === 'collection') {
+                // Delete from database
+                const dbResult = await deleteCollection(deleteItem.id);
+
+                if (!dbResult.success) {
+                    throw new Error('Failed to delete from database');
+                }
+
+                // Delete from storage
+                if (deleteItem.storagePath) {
+                    await deleteImageFromStorage(deleteItem.storagePath);
+                }
+
+                // Update state
+                setCollections(collections.filter(c => c.id !== deleteItem.id));
+                setPopupMessage('Collection deleted successfully!');
+                setShowPopup(true);
+                setTimeout(() => setShowPopup(false), 2000);
             } else if (deleteItem.handler === 'contact') {
                 const result = await deleteContactEntry(deleteItem.id);
 
@@ -590,6 +617,68 @@ const AdminDashboard = () => {
 
     const handleDeleteHomeImage = (id, storagePath) => {
         setDeleteItem({ id, storagePath, handler: 'home' });
+        setShowDeleteConfirm(true);
+    };
+
+    // Collection Handlers
+    const handleCollectionImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setCollectionForm({ ...collectionForm, image: file });
+        }
+    };
+
+    const handleAddCollection = async (e) => {
+        e.preventDefault();
+        if (!collectionForm.name || !collectionForm.image) {
+            setPopupMessage('Please provide both name and image.');
+            setShowPopup(true);
+            return;
+        }
+
+        setIsSubmittingCollection(true);
+        setPopupMessage('Adding collection...');
+        setShowPopup(true);
+
+        try {
+            // Upload image
+            const uploadResult = await uploadImageToStorage(collectionForm.image, 'Gallery', 'collections');
+            if (!uploadResult.success) throw new Error('Image upload failed');
+
+            // Add to DB
+            const addResult = await addCollection({
+                name: collectionForm.name,
+                image: uploadResult.url,
+                storage_path: uploadResult.path
+            });
+
+            if (!addResult.success) {
+                await deleteImageFromStorage(uploadResult.path);
+                throw new Error(addResult.error.message || 'Database error');
+            }
+
+            // Update state
+            setCollections([addResult.data, ...collections]);
+            setCollectionForm({ name: '', image: null });
+
+            // Reset file input
+            const fileInput = document.getElementById('collection-image-input');
+            if (fileInput) fileInput.value = '';
+
+            setPopupMessage('Collection added successfully!');
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 2000);
+        } catch (error) {
+            console.error(error);
+            setPopupMessage('Failed to add collection.');
+            setShowPopup(true);
+        } finally {
+            setIsSubmittingCollection(false);
+        }
+    };
+
+    const handleDeleteCollection = (id, storagePath) => {
+        setDeleteItem({ id, storagePath, handler: 'collection' });
         setShowDeleteConfirm(true);
     };
 
@@ -1339,6 +1428,85 @@ const AdminDashboard = () => {
         </motion.div>
     );
 
+    const renderCollectionsContent = () => (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="gallery-manager"
+        >
+            <div className="dashboard-header">
+                <div className="header-left">
+                    <button className="menu-toggle-btn" onClick={toggleSidebar}>☰</button>
+                    <div className="header-title">
+                        <h1>Collections Management</h1>
+                        <p>Manage your collections.</p>
+                    </div>
+                </div>
+                <div className="header-actions">
+                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')}>
+                        <span className="bell-icon">🔔</span>
+                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                            <span className="notification-badge">{contactEntries.filter(entry => entry.status === 'new').length}</span>
+                        )}
+                    </div>
+                    <div className="admin-profile">
+                        {adminProfile.image ? <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" /> : <div className="admin-avatar">AD</div>}
+                        <span className="admin-name">{adminProfile.name}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="admin-card add-image-section">
+                <h3>Add New Collection</h3>
+                <form onSubmit={handleAddCollection} className="add-image-form">
+                    <div className="form-group">
+                        <label>Collection Name</label>
+                        <input
+                            type="text"
+                            placeholder="Enter collection name"
+                            value={collectionForm.name}
+                            onChange={(e) => setCollectionForm({ ...collectionForm, name: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Cover Image</label>
+                        <input
+                            id="collection-image-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCollectionImageChange}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="btn-primary" disabled={isSubmittingCollection}>
+                        {isSubmittingCollection ? 'Adding...' : 'Add Collection'}
+                    </button>
+                </form>
+            </div>
+
+            <div className="media-section-header">
+                <h3>Existing Collections ({collections.length})</h3>
+            </div>
+
+            <div className="admin-gallery-grid" style={{ marginTop: '1rem' }}>
+                {collections.map(collection => (
+                    <div key={collection.id} className="admin-gallery-item collection-card">
+                        <img src={collection.image} alt={collection.name} />
+                        <div className="item-actions" style={{ display: 'flex', alignItems: 'center' }}>
+                            <div style={{ color: 'white', fontWeight: 'bold', marginRight: 'auto' }}>{collection.name}</div>
+                            <button
+                                className="btn-delete"
+                                onClick={() => handleDeleteCollection(collection.id, collection.storage_path)}
+                            >Delete</button>
+                        </div>
+                    </div>
+                ))}
+                {collections.length === 0 && <p className="no-images">No collections found.</p>}
+            </div>
+        </motion.div>
+    );
+
     const renderHomeGalleryContent = () => (
         <motion.div
             initial={{ opacity: 0 }}
@@ -1545,7 +1713,7 @@ const AdminDashboard = () => {
                 {activeTab === 'contact-inquiries' && renderContactInquiries()}
                 {activeTab === 'gallery' && renderGalleryContent()}
                 {activeTab === 'home-gallery' && renderHomeGalleryContent()}
-                {activeTab === 'collections' && <div className="placeholder-tab">Collections Management Coming Soon</div>}
+                {activeTab === 'collections' && renderCollectionsContent()}
                 {activeTab === 'settings' && renderSettingsContent()}
             </main>
 

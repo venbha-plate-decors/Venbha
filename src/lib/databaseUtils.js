@@ -233,3 +233,83 @@ export const updateHomeGalleryOrder = async (items) => {
         return { success: false, error };
     }
 };
+
+/**
+ * Fetch all collections from database
+ * @returns {Promise<{success: boolean, data?: array, error?: any}>}
+ */
+export const fetchCollections = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('collections')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Fetch error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data || [] };
+    } catch (error) {
+        console.error('Fetch error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Add a new collection to database
+ * @param {object} itemData - {name, image, storage_path}
+ * @returns {Promise<{success: boolean, data?: object, error?: any}>}
+ */
+export const addCollection = async (itemData) => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data, error } = await supabase
+            .from('collections')
+            .insert([
+                {
+                    name: itemData.name,
+                    image: itemData.image,
+                    storage_path: itemData.storage_path,
+                    user_id: user?.id
+                }
+            ])
+            .select();
+
+        if (error) {
+            console.error('Insert error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data[0] };
+    } catch (error) {
+        console.error('Insert error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Delete a collection from database
+ * @param {string} id - Collection ID
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const deleteCollection = async (id) => {
+    try {
+        const { error } = await supabase
+            .from('collections')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Delete error:', error);
+        return { success: false, error };
+    }
+};

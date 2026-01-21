@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { HashRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import RosePetals from './components/RosePetals';
@@ -36,7 +36,7 @@ const PublicLayout = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename={import.meta.env.DEV ? '/' : '/Venbha'}>
       <AuthProvider>
         <ScrollToTop />
         <Suspense fallback={<Loading />}>

@@ -242,6 +242,15 @@
     .story-text-container {
         text-align: center;
     }
+
+    .story-text,
+    .benefit-text,
+    .vm-text {
+        text-align: center;
+        text-align-last: center;
+        word-spacing: normal;
+        hyphens: none;
+    }
 }
 
 @media (max-width: 768px) {

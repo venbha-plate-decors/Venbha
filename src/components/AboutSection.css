@@ -78,10 +78,8 @@
     color: #666;
     margin-bottom: 20px;
     line-height: 1.8;
-    text-align: justify;
-    text-align-last: left;
-    hyphens: none;
-    word-break: normal;
+    text-align: left;
+    /* Changed from justify to left for better spacing */
 }
 
 .features-list {
@@ -107,17 +105,33 @@
 @media (max-width: 968px) {
     .about-container {
         flex-direction: column;
-        text-align: center;
+        /* Removed text-align: center to keep text clean and left-aligned */
+    }
+
+    .about-content {
+        width: 100%;
+        padding: 0 20px;
+    }
+
+    .about-image-wrapper {
+        width: 100%;
+        margin-bottom: 30px;
     }
 
     .about-section {
-        padding-bottom: 20px;
+        padding-bottom: 50px;
+    }
+
+    .about-text {
+        text-align: justify;
+        text-align-last: left;
+        hyphens: auto;
     }
 
     .features-list {
-        text-align: left;
-        max-width: 400px;
-        margin: 30px auto 0;
+        /* Ensure grid fits well on mobile */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
     }
 }
 
@@ -128,6 +142,8 @@
 
     .features-list {
         grid-template-columns: 1fr;
+        /* Stack features on very small screens */
+        gap: 15px;
     }
 }
 

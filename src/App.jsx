@@ -36,7 +36,7 @@ const PublicLayout = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/Venbha">
       <AuthProvider>
         <ScrollToTop />
         <Suspense fallback={<Loading />}>

@@ -26,6 +26,9 @@ jobs:
         run: npm ci --legacy-peer-deps
       
       - name: Build project
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
         run: npm run build
       
       - name: Deploy to GitHub Pages

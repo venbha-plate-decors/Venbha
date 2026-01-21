@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/Venbha/',
   plugins: [react()],
+  server: {
+    host: true, // Enable network access
+    port: 5173, // Default port
+    strictPort: false, // Use another port if 5173 is busy
+  },
   build: {
     // Minify output
     minify: 'esbuild', // standard speedy minifier

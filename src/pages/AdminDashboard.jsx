@@ -65,6 +65,9 @@ const AdminDashboard = () => {
         notes: ''
     });
 
+    // Export Modal State
+    const [showExportModal, setShowExportModal] = useState(false);
+
     const openNotesModal = (entry, mode) => {
         setNotesModal({
             isOpen: true,
@@ -130,6 +133,87 @@ const AdminDashboard = () => {
             setPopupMessage('Failed to update status');
             setShowPopup(true);
         }
+    };
+
+    // Export Functions
+    const exportToCSV = () => {
+        const headers = ['Name', 'Email', 'Phone', 'Message', 'Date', 'Notes', 'Status'];
+        const csvData = contactEntries.map(entry => [
+            entry.name,
+            entry.email,
+            entry.phone,
+            entry.message,
+            new Date(entry.created_at).toLocaleString('en-IN'),
+            entry.notes || '',
+            entry.workflow_status || 'Not Set'
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        downloadFile(csvContent, 'contact-enquiries.csv', 'text/csv');
+        setShowExportModal(false);
+        setPopupMessage('Exported to CSV successfully!');
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+    };
+
+    const exportToExcel = () => {
+        const data = contactEntries.map(entry => ({
+            'Name': entry.name,
+            'Email': entry.email,
+            'Phone': entry.phone,
+            'Message': entry.message,
+            'Date': new Date(entry.created_at).toLocaleString('en-IN'),
+            'Notes': entry.notes || '',
+            'Status': entry.workflow_status || 'Not Set'
+        }));
+
+        // Convert to CSV format (Excel can open CSV files)
+        const headers = Object.keys(data[0] || {});
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => `"${String(row[header]).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        downloadFile(csvContent, 'contact-enquiries.xlsx', 'application/vnd.ms-excel');
+        setShowExportModal(false);
+        setPopupMessage('Exported to Excel successfully!');
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+    };
+
+    const exportToJSON = () => {
+        const data = contactEntries.map(entry => ({
+            name: entry.name,
+            email: entry.email,
+            phone: entry.phone,
+            message: entry.message,
+            date: new Date(entry.created_at).toISOString(),
+            notes: entry.notes || '',
+            status: entry.workflow_status || 'Not Set'
+        }));
+
+        const jsonContent = JSON.stringify(data, null, 2);
+        downloadFile(jsonContent, 'contact-enquiries.json', 'application/json');
+        setShowExportModal(false);
+        setPopupMessage('Exported to JSON successfully!');
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+    };
+
+    const downloadFile = (content, filename, mimeType) => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
 
@@ -768,6 +852,46 @@ const AdminDashboard = () => {
                     </table>
                 </div>
             </motion.div>
+
+            {/* Export Modal */}
+            {showExportModal && (
+                <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
+                    <motion.div
+                        className="modal-content export-modal"
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <div className="modal-header">
+                            <h2>Export Contact Enquiries</h2>
+                            <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                                Choose your preferred export format:
+                            </p>
+                            <div className="export-options">
+                                <button className="export-option-btn excel-btn" onClick={exportToExcel}>
+                                    <span className="export-icon">📊</span>
+                                    <span className="export-label">Excel (.xlsx)</span>
+                                    <span className="export-desc">Best for spreadsheet analysis</span>
+                                </button>
+                                <button className="export-option-btn csv-btn" onClick={exportToCSV}>
+                                    <span className="export-icon">📄</span>
+                                    <span className="export-label">CSV (.csv)</span>
+                                    <span className="export-desc">Universal format</span>
+                                </button>
+                                <button className="export-option-btn json-btn" onClick={exportToJSON}>
+                                    <span className="export-icon">🔧</span>
+                                    <span className="export-label">JSON (.json)</span>
+                                    <span className="export-desc">For developers</span>
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     );
 

@@ -131,6 +131,7 @@
     margin-left: var(--sidebar-width);
     /* Offset for fixed sidebar */
     padding: 2rem;
+    overflow: visible;
 }
 
 .dashboard-header {
@@ -381,6 +382,7 @@
 
 .table-container {
     overflow-x: auto;
+    overflow-y: visible;
 }
 
 table {
@@ -569,6 +571,227 @@ td {
     color: #991b1b;
 }
 
+/* Export Modal - Overlay and Container */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Export Modal Specific */
+.export-modal {
+    max-width: 550px;
+    width: 100%;
+}
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.export-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.export-option-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(190, 24, 93, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.export-option-btn:hover::before {
+    left: 100%;
+}
+
+.export-option-btn:hover {
+    border-color: var(--admin-primary);
+    background: var(--admin-secondary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(190, 24, 93, 0.2);
+}
+
+.export-option-btn:active {
+    transform: translateY(-1px);
+}
+
+.export-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    user-select: none;
+    transition: transform 0.3s ease;
+}
+
+.export-option-btn:hover .export-icon {
+    transform: scale(1.1);
+}
+
+.export-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+}
+
+.export-desc {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+/* Responsive Export Modal */
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .export-modal {
+        max-width: 100%;
+    }
+
+    .export-option-btn {
+        padding: 1.25rem;
+    }
+
+    .export-icon {
+        font-size: 2rem;
+    }
+
+    .export-label {
+        font-size: 1rem;
+    }
+
+    .export-desc {
+        font-size: 0.8rem;
+    }
+
+    .export-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .export-option-btn {
+        padding: 1rem;
+    }
+
+    .export-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
 
 
 /* Responsive */
@@ -732,10 +955,44 @@ td {
     }
 
     .header-actions {
-        width: auto;
+        width: 100%;
         border-top: none;
         padding-top: 0;
-        margin-left: auto;
+        margin-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Notification bell appears first */
+    .notification-bell {
+        order: 1;
+        flex-shrink: 0;
+    }
+
+    /* Admin profile appears second, next to bell */
+    .admin-profile {
+        order: 2;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Export button takes full width on mobile and appears below */
+    .export-btn {
+        order: 3;
+        width: 100%;
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
+        justify-content: center;
+        flex-basis: 100%;
+    }
+
+    .admin-name {
+        display: inline-block;
     }
 
     .header-title h1 {
@@ -750,24 +1007,24 @@ td {
         font-size: 1.5rem;
     }
 
-    /* Hide admin name on very small screens if needed, or keep defined */
-    .admin-name {
-        display: inline-block;
-    }
-
     /* Stack form elements and fix button alignment */
     .add-image-form {
         grid-template-columns: 1fr;
         align-items: stretch;
-        /* Stretch full width */
     }
 
     .add-image-form .btn-primary {
         margin-bottom: 0;
-        /* Remove desktop fix */
         margin-top: 15px;
-        /* Add spacing from input */
-        /* Full width button looks better on mobile */
+    }
+
+    /* Fix overflow for dropdowns in mobile */
+    .table-container {
+        overflow: visible !important;
+    }
+
+    .recent-orders {
+        overflow: visible !important;
     }
 
     /* Responsive Table Transformation */
@@ -780,6 +1037,14 @@ td {
         display: block;
     }
 
+    table {
+        overflow: visible !important;
+    }
+
+    tbody {
+        overflow: visible !important;
+    }
+
     /* Hide table headers (but not display:none for accessibility) */
     thead tr {
         position: absolute;
@@ -790,10 +1055,18 @@ td {
     tr {
         margin-bottom: 1.5rem;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         border: 1px solid #f0f0f0;
-        padding: 0.5rem 0;
+        padding: 1rem 0;
+        overflow: visible !important;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Increase z-index for rows with open dropdowns */
+    tr:has(select:focus) {
+        z-index: 100;
     }
 
     td {
@@ -801,12 +1074,12 @@ td {
         border: none;
         border-bottom: 1px solid #f9fafb;
         position: relative;
-        padding: 0.8rem 1.5rem;
+        padding: 0.9rem 1.5rem;
         text-align: right;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        min-height: 48px;
+        min-height: 52px;
     }
 
     td::before {
@@ -814,7 +1087,7 @@ td {
         position: static;
         transform: none;
         width: auto;
-        padding-right: 10px;
+        padding-right: 12px;
         white-space: nowrap;
         text-align: left;
         font-weight: 600;
@@ -826,7 +1099,13 @@ td {
 
     td:last-child {
         border-bottom: none;
-        padding-bottom: 1rem;
+        padding-bottom: 1.2rem;
+    }
+
+    td:first-child {
+        padding-top: 1.2rem;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
     }
 
     /* Handle long text in message - Display label on left and content on right */
@@ -850,15 +1129,21 @@ td {
         /* No width: 100% needed with space-between */
     }
 
-    /* Status dropdown mobile styling */
+    /* Status dropdown mobile styling - Fix overflow */
     td[data-label="Status"] {
-        align-items: flex-start;
+        align-items: center;
+        overflow: visible !important;
+        position: relative;
+        z-index: 50;
     }
 
     td[data-label="Status"] .status-dropdown {
         min-width: auto;
         width: 100%;
-        max-width: 250px;
+        max-width: none;
+        flex: 1;
+        position: relative;
+        z-index: 100;
     }
 }
 

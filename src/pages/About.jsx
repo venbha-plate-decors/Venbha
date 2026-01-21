@@ -29,8 +29,8 @@ const About = () => {
                     <div className="story-text-container">
                         <h2 className="section-title">Our Story</h2>
                         <p className="story-text">
-                            At <strong>Venbha Plate Decors</strong>, we believe every special moment deserves a touch of elegance. What began as a heartfelt passion for arranging traditional
-                            <strong>aarthi plates</strong> for family gatherings has grown into a premier service dedicated to adding sparkle to your most cherished occasions.
+                            At <strong>Venbha Plate Decors</strong>, we believe every special moment deserves a touch of elegance. What began as a heartfelt passion for arranging <strong>traditional
+                                aarthi plates</strong> for family gatherings has grown into a premier service dedicated to adding sparkle to your most cherished occasions.
                         </p>
                         <p className="story-text">
                             From the vibrant colors of a <strong>Valaikaappu (Baby Shower)</strong> to the grandeur of <strong>wedding seer varisai</strong>, we specialize in

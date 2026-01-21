@@ -10,8 +10,8 @@
 
 .page-header {
     text-align: center;
-    padding: 60px 20px 40px;
-    margin-bottom: 40px;
+    padding: 40px 20px 20px;
+    margin-bottom: 30px;
 }
 
 .page-title {
@@ -196,7 +196,7 @@
     }
 
     .page-header {
-        padding: 50px 20px 30px;
+        padding: 30px 20px 15px;
     }
 }
 
@@ -221,8 +221,8 @@
     }
 
     .page-header {
-        padding: 30px 15px 20px;
-        margin-bottom: 20px;
+        padding: 25px 15px 15px;
+        margin-bottom: 15px;
     }
 
     .page-title {

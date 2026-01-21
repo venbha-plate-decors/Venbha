@@ -78,6 +78,10 @@
     color: #666;
     margin-bottom: 20px;
     line-height: 1.8;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: none;
+    word-break: normal;
 }
 
 .features-list {

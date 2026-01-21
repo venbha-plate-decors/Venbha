@@ -27,8 +27,8 @@ jobs:
       
       - name: Build project
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          VITE_SUPABASE_URL: "https://xyijcuzehvucncesvvzq.supabase.co"
+          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: "sb_publishable_BRJ3QYxCXOJsUr6pt1s5Ng_9-EwA00Y"
         run: npm run build
       
       - name: Deploy to GitHub Pages

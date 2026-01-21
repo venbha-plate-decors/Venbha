@@ -1140,8 +1140,24 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                                 <div className="mobile-reorder-controls">
-                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}>↑</button>
-                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}>↓</button>
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
+                                    >
+                                        ↓
+                                    </button>
                                 </div>
                             </SortableGalleryItem>
                         ))}
@@ -1193,8 +1209,24 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                                 <div className="mobile-reorder-controls">
-                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'video'); }}>↑</button>
-                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'video'); }}>↓</button>
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'video'); }}
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'video'); }}
+                                    >
+                                        ↓
+                                    </button>
                                 </div>
                             </SortableGalleryItem>
                         ))}
@@ -1403,8 +1435,24 @@ const AdminDashboard = () => {
                             </button>
                         </div>
                         <div className="mobile-reorder-controls">
-                            <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'home'); }}>↑</button>
-                            <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'home'); }}>↓</button>
+                            <button
+                                type="button"
+                                className="mobile-reorder-btn"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'home'); }}
+                            >
+                                ↑
+                            </button>
+                            <button
+                                type="button"
+                                className="mobile-reorder-btn"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'home'); }}
+                            >
+                                ↓
+                            </button>
                         </div>
                     </SortableGalleryItem>
                 ))}

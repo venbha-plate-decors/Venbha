@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, Reorder } from 'framer-motion';
+import { motion, Reorder, useDragControls } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,46 @@ import { uploadImageToStorage, uploadVideoToStorage, deleteImageFromStorage } fr
 import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import './AdminDashboard.css';
+
+
+// Custom Sortable Item for Hold-to-Drag on Mobile
+const SortableGalleryItem = ({ item, children, className, ...props }) => {
+    const dragControls = useDragControls();
+    const timeoutRef = useRef(null);
+
+    const handleTouchStart = (event) => {
+        // Prevent default browser behavior (optional, beware blocking scroll)
+        // event.preventDefault(); // Don't do this, it blocks scrolling completely
+
+        timeoutRef.current = setTimeout(() => {
+            if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+            dragControls.start(event);
+        }, 2000);
+    };
+
+    const cancelPress = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+    };
+
+    return (
+        <Reorder.Item
+            value={item}
+            dragListener={false}
+            dragControls={dragControls}
+            className={className}
+            {...props}
+            onMouseDown={(e) => dragControls.start(e)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={cancelPress}
+            onTouchMove={cancelPress}
+        >
+            {children}
+        </Reorder.Item>
+    );
+};
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -1045,9 +1085,9 @@ const AdminDashboard = () => {
                         style={{ listStyle: 'none', padding: 0 }}
                     >
                         {galleryImages.map((img) => (
-                            <Reorder.Item
+                            <SortableGalleryItem
                                 key={img.id}
-                                value={img}
+                                item={img}
                                 className="admin-gallery-item"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -1070,7 +1110,7 @@ const AdminDashboard = () => {
                                         Delete
                                     </button>
                                 </div>
-                            </Reorder.Item>
+                            </SortableGalleryItem>
                         ))}
                         {galleryImages.length === 0 && (
                             <p className="no-images">No photos in gallery.</p>
@@ -1101,9 +1141,9 @@ const AdminDashboard = () => {
                         style={{ listStyle: 'none', padding: 0 }}
                     >
                         {galleryVideos.map((vid) => (
-                            <Reorder.Item
+                            <SortableGalleryItem
                                 key={vid.id}
-                                value={vid}
+                                item={vid}
                                 className="admin-gallery-item"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -1119,7 +1159,7 @@ const AdminDashboard = () => {
                                         Delete
                                     </button>
                                 </div>
-                            </Reorder.Item>
+                            </SortableGalleryItem>
                         ))}
                         {galleryVideos.length === 0 && (
                             <p className="no-images">No videos in gallery.</p>
@@ -1300,9 +1340,9 @@ const AdminDashboard = () => {
                 style={{ listStyle: 'none', padding: 0 }}
             >
                 {homeGalleryImages.map((img) => (
-                    <Reorder.Item
+                    <SortableGalleryItem
                         key={img.id}
-                        value={img}
+                        item={img}
                         className="admin-gallery-item"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -1325,7 +1365,7 @@ const AdminDashboard = () => {
                                 Delete
                             </button>
                         </div>
-                    </Reorder.Item>
+                    </SortableGalleryItem>
                 ))}
                 {homeGalleryImages.length === 0 && (
                     <p className="no-images">No photos in homepage gallery.</p>

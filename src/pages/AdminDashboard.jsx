@@ -559,6 +559,35 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleMoveItem = (index, direction, listType) => {
+        let items = [];
+        let setItems = null;
+        let updateDb = null;
+
+        if (listType === 'image') {
+            items = [...galleryImages];
+            setItems = setGalleryImages;
+            updateDb = updateGalleryOrder;
+        } else if (listType === 'video') {
+            items = [...galleryVideos];
+            setItems = setGalleryVideos;
+            updateDb = updateGalleryOrder;
+        } else if (listType === 'home') {
+            items = [...homeGalleryImages];
+            setItems = setHomeGalleryImages;
+            updateDb = updateHomeGalleryOrder;
+        }
+
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= items.length) return;
+
+        // Swap
+        [items[index], items[newIndex]] = [items[newIndex], items[index]];
+
+        setItems(items);
+        updateDb(items);
+    };
+
     const handleDeleteHomeImage = (id, storagePath) => {
         setDeleteItem({ id, storagePath, handler: 'home' });
         setShowDeleteConfirm(true);
@@ -1084,7 +1113,7 @@ const AdminDashboard = () => {
                         className="admin-gallery-grid"
                         style={{ listStyle: 'none', padding: 0 }}
                     >
-                        {galleryImages.map((img) => (
+                        {galleryImages.map((img, index) => (
                             <SortableGalleryItem
                                 key={img.id}
                                 item={img}
@@ -1109,6 +1138,10 @@ const AdminDashboard = () => {
                                     >
                                         Delete
                                     </button>
+                                </div>
+                                <div className="mobile-reorder-controls">
+                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}>↑</button>
+                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}>↓</button>
                                 </div>
                             </SortableGalleryItem>
                         ))}
@@ -1140,7 +1173,7 @@ const AdminDashboard = () => {
                         className="admin-gallery-grid"
                         style={{ listStyle: 'none', padding: 0 }}
                     >
-                        {galleryVideos.map((vid) => (
+                        {galleryVideos.map((vid, index) => (
                             <SortableGalleryItem
                                 key={vid.id}
                                 item={vid}
@@ -1158,6 +1191,10 @@ const AdminDashboard = () => {
                                     >
                                         Delete
                                     </button>
+                                </div>
+                                <div className="mobile-reorder-controls">
+                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'video'); }}>↑</button>
+                                    <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'video'); }}>↓</button>
                                 </div>
                             </SortableGalleryItem>
                         ))}
@@ -1339,7 +1376,7 @@ const AdminDashboard = () => {
                 className="admin-gallery-grid"
                 style={{ listStyle: 'none', padding: 0 }}
             >
-                {homeGalleryImages.map((img) => (
+                {homeGalleryImages.map((img, index) => (
                     <SortableGalleryItem
                         key={img.id}
                         item={img}
@@ -1364,6 +1401,10 @@ const AdminDashboard = () => {
                             >
                                 Delete
                             </button>
+                        </div>
+                        <div className="mobile-reorder-controls">
+                            <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'home'); }}>↑</button>
+                            <button type="button" className="mobile-reorder-btn" onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'home'); }}>↓</button>
                         </div>
                     </SortableGalleryItem>
                 ))}

@@ -1717,3 +1717,60 @@ td {
     box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
     background: #dc2626;
 }
+
+/* Mobile Reorder Controls */
+.mobile-reorder-controls {
+    display: none;
+}
+
+@media (max-width: 968px) {
+    .mobile-reorder-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        justify-content: center;
+        width: 100%;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .mobile-reorder-btn {
+        background: #f0f0f0;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #555;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        min-height: 44px;
+        /* Touch target size */
+    }
+
+    .mobile-reorder-btn:hover {
+        background: #e0e0e0;
+        color: var(--admin-primary);
+    }
+
+    .mobile-reorder-btn:active {
+        background: #d0d0d0;
+    }
+
+    /* Ensure gallery item allows content to stack */
+    .admin-gallery-item {
+        height: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding-bottom: 10px !important;
+    }
+
+    .item-actions {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+}

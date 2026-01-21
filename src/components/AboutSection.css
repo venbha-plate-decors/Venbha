@@ -113,6 +113,12 @@
         padding: 0 20px;
     }
 
+    /* Center align titles on mobile for better balance */
+    .sub-title,
+    .section-title {
+        text-align: center;
+    }
+
     .about-image-wrapper {
         width: 100%;
         margin-bottom: 30px;

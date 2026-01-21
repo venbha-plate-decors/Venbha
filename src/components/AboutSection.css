@@ -125,7 +125,8 @@
     .about-text {
         text-align: justify;
         text-align-last: left;
-        hyphens: auto;
+        hyphens: none;
+        /* Prevent words from breaking/hyphenating */
     }
 
     .features-list {

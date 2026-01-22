@@ -17,7 +17,7 @@ const AboutSection = () => {
                     transition={{ duration: 0.8 }}
                     viewport={{ once: true, amount: 0.3 }}
                 >
-                    <img src={aboutImage} alt="Venbha Plate Decors Creations" className="about-img" />
+                    <img src={aboutImage} alt="Venbha Plate Decors Creations" className="about-img" loading="lazy" />
                 </motion.div>
 
                 <motion.div

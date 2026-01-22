@@ -61,6 +61,7 @@ const Testimonials = () => {
                                 <img
                                     src={item.image}
                                     alt={item.name}
+                                    loading="lazy"
                                     onError={(e) => {
                                         e.target.onerror = null;
                                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=D81B60&color=fff&size=200`;

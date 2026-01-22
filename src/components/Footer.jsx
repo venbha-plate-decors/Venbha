@@ -50,6 +50,14 @@ const Footer = () => {
                     </div>
 
                     <div className="footer-column">
+                        <h3>Quick Links</h3>
+                        <p className="footer-text"><Link to="/" className="footer-link">Home</Link></p>
+                        <p className="footer-text"><Link to="/collections" className="footer-link">Collections</Link></p>
+                        <p className="footer-text"><Link to="/about" className="footer-link">About Us</Link></p>
+                        <p className="footer-text"><Link to="/blogs" className="footer-link">Blogs</Link></p>
+                    </div>
+
+                    <div className="footer-column">
                         <h3>Our Address</h3>
                         <p className="footer-text">
                             <span role="img" aria-label="location">📍</span> 15, Nehru Street, Velampalayam,<br />
@@ -58,14 +66,6 @@ const Footer = () => {
                             Nehru Street, Annur,<br />
                             Avanashi-641653, Tamil Nadu
                         </p>
-                    </div>
-
-                    <div className="footer-column">
-                        <h3>Quick Links</h3>
-                        <p className="footer-text"><Link to="/" className="footer-link">Home</Link></p>
-                        <p className="footer-text"><Link to="/collections" className="footer-link">Collections</Link></p>
-                        <p className="footer-text"><Link to="/about" className="footer-link">About Us</Link></p>
-                        <p className="footer-text"><Link to="/blogs" className="footer-link">Blogs</Link></p>
                     </div>
 
                 </div>

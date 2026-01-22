@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import Hero from '../components/Hero';
 import AboutSection from '../components/AboutSection';
 import Gallery from '../components/Gallery';
+import Testimonials from '../components/Testimonials';
+import FAQ from '../components/FAQ';
 
 const Home = () => {
     return (
@@ -14,6 +16,8 @@ const Home = () => {
             <Hero />
             <AboutSection />
             <Gallery storageKey="homeGalleryImages" showPhotosTitle={false} />
+            <Testimonials />
+            <FAQ />
         </>
     );
 };

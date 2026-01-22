@@ -1,6 +1,6 @@
 /* Contact Page Styles */
 .contact-page {
-    padding-top: 100px;
+    padding-top: 80px;
     /* Space for fixed header */
     min-height: 100vh;
     padding-bottom: 50px;
@@ -10,8 +10,8 @@
 
 .page-header {
     text-align: center;
-    padding: 40px 20px 20px;
-    margin-bottom: 30px;
+    padding: 20px 20px 10px;
+    margin-bottom: 20px;
 }
 
 .page-title {
@@ -41,7 +41,7 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    gap: 50px;
+    gap: 30px;
     align-items: flex-start;
 }
 

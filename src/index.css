@@ -60,6 +60,45 @@ img {
   padding: 0 20px;
 }
 
+/* 4K and Large Screens Responsiveness */
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+@media (min-width: 2000px) {
+  html {
+    font-size: 18px;
+    /* Slightly larger base font */
+  }
+
+  .container {
+    max-width: 1800px;
+  }
+}
+
+@media (min-width: 3000px) {
+  html {
+    font-size: 24px;
+    /* Much larger base font for true 4K/5K */
+  }
+
+  .container {
+    max-width: 2400px;
+  }
+}
+
+/* Mac / Laptop Specific (1280px - 1440px) */
+@media (min-width: 1200px) and (max-width: 1536px) {
+
+  /* Ensure container doesn't feel too tight on 13 inch laptops */
+  .container {
+    max-width: 1100px;
+  }
+}
+
+
 /* Global Cursor Override: Remove 'type symbol' (I-beam) from text */
 *,
 p,

@@ -93,12 +93,9 @@
 }
 
 /* Pink Theme Buttons */
-/* Pink Theme Buttons */
 .cta-button {
     padding: 16px 40px;
     background: linear-gradient(45deg, #e91e63, #c2185b);
-    /* Matching the typical gradient based on the image: brighter pink to darker pink */
-    /* Or specifically from AboutSection: linear-gradient(45deg, #ff69b4, #ff1493) */
     background: linear-gradient(45deg, #ff69b4, #ff1493);
     color: white;
     font-weight: 600;
@@ -132,6 +129,7 @@
 .cta-button.secondary:hover {
     background: linear-gradient(45deg, #ff1493, #c2185b);
     color: #fff;
+    box-shadow: 0 15px 25px rgba(233, 30, 99, 0.4);
 }
 
 /* Cleanup */
@@ -141,7 +139,42 @@
     display: none;
 }
 
-/* Responsive */
+/* Large Screens (2K/4K) */
+@media (min-width: 1600px) {
+    .hero-content {
+        max-width: 1600px;
+    }
+
+    .hero-title {
+        font-size: 5.5rem;
+    }
+
+    .hero-text {
+        max-width: 800px;
+    }
+
+    .hero-description {
+        font-size: 1.3rem;
+        max-width: 650px;
+    }
+}
+
+@media (min-width: 2560px) {
+    .hero-content {
+        max-width: 2200px;
+    }
+
+    .hero-title {
+        font-size: 7rem;
+    }
+
+    .cta-button {
+        padding: 24px 60px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Standard Responsive */
 @media (max-width: 1024px) {
     .hero-title {
         font-size: 3.5rem;
@@ -165,9 +198,9 @@
     /* On mobile, fade from top to bottom ensuring top text is readable */
     .hero-overlay {
         background: linear-gradient(to bottom,
-                rgba(0, 0, 0, 0.6) 0%,
-                rgba(0, 0, 0, 0.4) 40%,
-                rgba(0, 0, 0, 0.1) 100%);
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.6) 40%,
+                rgba(0, 0, 0, 0.4) 100%);
     }
 
     .hero-content {
@@ -189,6 +222,10 @@
     .hero-description {
         margin: 0 auto 30px;
         font-size: 1.1rem;
+        color: #fff;
+        /* Ensure readability */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        /* Add shadow for better text contrast on small screens */
     }
 
     .cta-group {

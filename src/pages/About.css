@@ -1,6 +1,6 @@
 /* About Page Styles */
 .about-page {
-    padding-top: 100px;
+    padding-top: 80px;
     min-height: 100vh;
 }
 
@@ -8,7 +8,7 @@
     text-align: center;
     padding: 40px 20px 20px;
     background: transparent;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .page-title {
@@ -35,7 +35,7 @@
 /* Story and Mission Sections */
 .story-section,
 .mission-section {
-    padding: 40px 20px 80px;
+    padding: 20px 20px 40px;
 }
 
 .story-content {
@@ -100,7 +100,7 @@
 
 /* Why Choose Us */
 .why-choose-us {
-    padding: 80px 20px;
+    padding: 40px 20px;
     background: rgba(255, 255, 255, 0.6);
     text-align: center;
 }
@@ -110,7 +110,7 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     max-width: 1200px;
-    margin: 50px auto 0;
+    margin: 30px auto 0;
 }
 
 .benefit-card {
@@ -261,7 +261,7 @@
 
 /* Vision & Mission Styles */
 .vision-mission-section {
-    padding: 80px 20px;
+    padding: 40px 20px;
     text-align: center;
 }
 

@@ -48,7 +48,8 @@ const AdminLogin = () => {
             }
 
             if (data.user) {
-                // Successfully logged in, navigation will happen via useEffect
+                // Successfully logged in, reset dashboard tab to overview
+                localStorage.setItem('adminActiveTab', 'dashboard');
                 console.log('Login successful:', data.user);
             }
         } catch (err) {

@@ -73,7 +73,7 @@ const Footer = () => {
                 <div className="footer-bottom">
                     <p>&copy; {new Date().getFullYear()} Venbha Plate Decors. All rights reserved.</p>
                     <p className="powered-by">
-                        Powered by <a href="https://tech.kanavu.org" target="_blank" rel="noopener noreferrer">Kanavu Startup Village</a>
+                        Powered by <a href="https://kanavu.org" target="_blank" rel="noopener noreferrer">Kanavu Startup Village</a>
                     </p>
                 </div>
             </div>

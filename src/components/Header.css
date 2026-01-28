@@ -154,6 +154,7 @@
 
     .menu-toggle {
         display: block;
+        margin-top: 10px;
     }
 
     .nav-links {

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
 import './AdminLogin.css';
+import logo from '../assets/venbha_logo_circled.png';
 
 const AdminLogin = () => {
     const [formData, setFormData] = useState({
@@ -75,6 +76,7 @@ const AdminLogin = () => {
                 transition={{ duration: 0.6 }}
             >
                 <div className="login-header">
+                    <img src={logo} alt="Venbha" className="login-logo" />
                     <h2>Admin Login</h2>
                     <p>Welcome back! Please access the dashboard.</p>
                 </div>

@@ -8,6 +8,7 @@ import { uploadImageToStorage, uploadVideoToStorage, deleteImageFromStorage } fr
 import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import './AdminDashboard.css';
+import logo from '../assets/venbha_logo_circled.png';
 
 
 // Custom Sortable Item for Hold-to-Drag on Mobile
@@ -1215,6 +1216,24 @@ const AdminDashboard = () => {
                                 <img src={img.url || img.src} alt="Gallery" />
                                 <div className="item-actions">
                                     <button
+                                        className="btn-move"
+                                        title="Move Backward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
+                                        disabled={index === 0}
+                                        style={{ opacity: index === 0 ? 0.5 : 1, cursor: index === 0 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        ←
+                                    </button>
+                                    <button
+                                        className="btn-move"
+                                        title="Move Forward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
+                                        disabled={index === galleryImages.length - 1}
+                                        style={{ opacity: index === galleryImages.length - 1 ? 0.5 : 1, cursor: index === galleryImages.length - 1 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        →
+                                    </button>
+                                    <button
                                         className="btn-download"
                                         title="Download"
                                         onClick={() => handleDownload(img.url || img.src, `gallery-${img.id}.png`)}
@@ -1288,8 +1307,40 @@ const AdminDashboard = () => {
                                 whileHover={{ scale: 1.02 }}
                                 whileDrag={{ scale: 1.1, zIndex: 10, cursor: 'grabbing' }}
                             >
-                                <video src={vid.url || vid.src} controls className="admin-video-preview" />
+                                <video
+                                    src={vid.url || vid.src}
+                                    className="admin-video-preview"
+                                    onClick={(e) => e.target.paused ? e.target.play() : e.target.pause()}
+                                    playsInline
+                                    loop
+                                    muted
+                                />
                                 <div className="item-actions">
+                                    <button
+                                        className="btn-move"
+                                        title="Move Backward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'video'); }}
+                                        disabled={index === 0}
+                                        style={{ opacity: index === 0 ? 0.5 : 1, cursor: index === 0 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        ←
+                                    </button>
+                                    <button
+                                        className="btn-move"
+                                        title="Move Forward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'video'); }}
+                                        disabled={index === galleryVideos.length - 1}
+                                        style={{ opacity: index === galleryVideos.length - 1 ? 0.5 : 1, cursor: index === galleryVideos.length - 1 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        →
+                                    </button>
+                                    <button
+                                        className="btn-download"
+                                        title="Download"
+                                        onClick={() => handleDownload(vid.url || vid.src, `video-${vid.id}.mp4`)}
+                                    >
+                                        <DownloadIcon width={18} height={18} />
+                                    </button>
                                     <button
                                         className="btn-delete"
                                         onClick={() => handleDeleteMedia(vid.id, 'video', vid.storage_path)}
@@ -1643,7 +1694,9 @@ const AdminDashboard = () => {
 
             <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-header-mobile">
-                    <div className="sidebar-brand">VENBHA ADMIN</div>
+                    <div className="sidebar-brand">
+                        <img src={logo} alt="Venbha Admin" className="sidebar-logo" />
+                    </div>
                     <button className="close-sidebar-btn" onClick={() => setIsSidebarOpen(false)}>×</button>
                 </div>
                 <nav className="sidebar-nav">

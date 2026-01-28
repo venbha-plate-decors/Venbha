@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
-import logo from '../assets/venbha_logo.png';
+import logo from '../assets/venbha_logo_circled.png';
 
 import { Link } from 'react-router-dom';
 
@@ -73,8 +73,8 @@ const Header = () => {
                     <Link to="/collections" className="nav-link" onClick={() => setIsMenuOpen(false)}>Collections</Link>
                     <Link to="/about" className="nav-link" onClick={() => setIsMenuOpen(false)}>About</Link>
                     <Link to="/gallery" className="nav-link" onClick={() => setIsMenuOpen(false)}>Gallery</Link>
+                    <Link to="/blogs" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blogs</Link>
                     <Link to="/contact" className="nav-link" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-                    <Link to="#" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blogs</Link>
                 </nav>
             </div>
         </header>

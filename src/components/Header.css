@@ -30,7 +30,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px;
+    height: 75px;
     /* Standard height */
     width: 100%;
 }
@@ -45,7 +45,7 @@
 }
 
 .logo-img {
-    height: 50px;
+    height: 65px;
     /* Base height */
     width: auto;
     object-fit: contain;
@@ -56,6 +56,7 @@
     display: flex;
     gap: 25px;
     align-items: center;
+    margin-right: 40px;
 }
 
 .nav-link {
@@ -106,11 +107,11 @@
     }
 
     .nav-container {
-        height: 80px;
+        height: 100px;
     }
 
     .logo-img {
-        height: 70px;
+        height: 90px;
     }
 
     .nav-link {
@@ -138,7 +139,7 @@
     }
 
     .nav-container {
-        height: 35px;
+        height: 55px;
         /* Reduce visual height for mobile */
         padding: 5px 0;
     }
@@ -173,6 +174,7 @@
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-right: 0;
     }
 
     .nav-links.active {

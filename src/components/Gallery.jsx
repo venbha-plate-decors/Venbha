@@ -5,6 +5,7 @@ import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages } from '
 
 const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhotosTitle = true }) => {
     const [selectedImage, setSelectedImage] = React.useState(null);
+    const [selectedVideo, setSelectedVideo] = React.useState(null);
     const [galleryImages, setGalleryImages] = React.useState([]);
     const [galleryVideos, setGalleryVideos] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
@@ -63,8 +64,14 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
         document.body.style.overflow = 'hidden';
     };
 
+    const openVideoLightbox = (video) => {
+        setSelectedVideo(video);
+        document.body.style.overflow = 'hidden';
+    };
+
     const closeLightbox = () => {
         setSelectedImage(null);
+        setSelectedVideo(null);
         document.body.style.overflow = 'auto';
     };
 
@@ -91,7 +98,7 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
                         <div key={image.id || index} className="gallery-item" onClick={() => openLightbox(image)}>
                             <img src={image.url || image.src} alt={image.alt || 'Gallery Image'} loading="lazy" />
                             <div className="gallery-overlay">
-                                <span>View More</span>
+                                <span>View</span>
                             </div>
                         </div>
                     ))}
@@ -102,24 +109,48 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
                         <div className="section-subtitle">Videos</div>
                         <div className="gallery-grid video-grid">
                             {galleryVideos.map((video, index) => (
-                                <div key={video.id || index} className="gallery-item video-item">
-                                    <video src={video.url || video.src} controls preload="metadata"></video>
-                                </div>
+                                <VideoCard key={video.id || index} video={video} onPlay={() => openVideoLightbox(video)} />
                             ))}
                         </div>
                     </div>
                 )}
             </div>
 
-            {selectedImage && (
+            {(selectedImage || selectedVideo) && (
                 <div className="lightbox" onClick={closeLightbox}>
                     <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
                         <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
-                        <img src={selectedImage.url || selectedImage.src} alt={selectedImage.alt} />
+                        {selectedImage ? (
+                            <img src={selectedImage.url || selectedImage.src} alt={selectedImage.alt} />
+                        ) : (
+                            <video
+                                src={selectedVideo.url || selectedVideo.src}
+                                controls
+                                autoPlay
+                                style={{ maxWidth: '100%', maxHeight: '90vh', boxShadow: '0 5px 25px rgba(0,0,0,0.5)' }}
+                            ></video>
+                        )}
                     </div>
                 </div>
             )}
         </section>
+    );
+};
+
+const VideoCard = ({ video, onPlay }) => {
+    return (
+        <div className="modern-video-card" onClick={onPlay}>
+            <video
+                src={video.url || video.src}
+                preload="metadata"
+                className="video-thumbnail"
+            ></video>
+            <div className="video-overlay">
+                <div className="play-button">
+                    <div className="play-icon"></div>
+                </div>
+            </div>
+        </div>
     );
 };
 

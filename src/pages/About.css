@@ -244,8 +244,7 @@
     }
 
     .story-text,
-    .benefit-text,
-    .vm-text {
+    .benefit-text {
         text-align: center;
         text-align-last: center;
         word-spacing: normal;
@@ -353,5 +352,14 @@
 @media (max-width: 768px) {
     .vm-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 968px) {
+    .vm-text {
+        text-align: center;
+        text-align-last: center;
+        word-spacing: normal;
+        hyphens: none;
     }
 }

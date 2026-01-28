@@ -313,3 +313,113 @@ export const deleteCollection = async (id) => {
         return { success: false, error };
     }
 };
+
+/**
+ * Update a collection in database
+ * @param {string} id - Collection ID
+ * @param {object} updates - {name, image, storage_path}
+ * @returns {Promise<{success: boolean, data?: object, error?: any}>}
+ */
+export const updateCollection = async (id, updates) => {
+    try {
+        const { data, error } = await supabase
+            .from('collections')
+            .update(updates)
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Update error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data[0] };
+    } catch (error) {
+        console.error('Update error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Fetch designs for a specific collection
+ * @param {string} collectionId 
+ * @returns {Promise<{success: boolean, data?: array, error?: any}>}
+ */
+export const fetchDesigns = async (collectionId) => {
+    try {
+        const { data, error } = await supabase
+            .from('designs')
+            .select('*')
+            .eq('collection_id', collectionId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Fetch error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data || [] };
+    } catch (error) {
+        console.error('Fetch error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Add a new design to a collection
+ * @param {object} itemData - {collection_id, name, image, storage_path, plate_count}
+ * @returns {Promise<{success: boolean, data?: object, error?: any}>}
+ */
+export const addDesign = async (itemData) => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data, error } = await supabase
+            .from('designs')
+            .insert([
+                {
+                    collection_id: itemData.collection_id,
+                    name: itemData.name,
+                    image: itemData.image,
+                    storage_path: itemData.storage_path,
+                    plate_count: itemData.plate_count,
+                    user_id: user?.id
+                }
+            ])
+            .select();
+
+        if (error) {
+            console.error('Insert error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data[0] };
+    } catch (error) {
+        console.error('Insert error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Delete a design from database
+ * @param {string} id - Design ID
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const deleteDesign = async (id) => {
+    try {
+        const { error } = await supabase
+            .from('designs')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Delete error:', error);
+        return { success: false, error };
+    }
+};

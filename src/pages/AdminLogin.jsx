@@ -64,6 +64,7 @@ const AdminLogin = () => {
         <div className="admin-login-page">
             <Helmet>
                 <title>Admin Login | Venbha Plate Decors</title>
+                <meta name="robots" content="noindex, nofollow" />
             </Helmet>
             {/* Background elements */}
             <div className="blob blob-1"></div>

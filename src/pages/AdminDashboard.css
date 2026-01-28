@@ -1280,6 +1280,42 @@ td {
     justify-content: flex-end;
     opacity: 0;
     transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.collection-overlay-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.admin-gallery-item:hover .collection-overlay-center {
+    opacity: 1;
+}
+
+.btn-add-designs {
+    background: white;
+    color: var(--admin-primary);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: scale(0.9);
+    transition: all 0.2s;
+}
+
+.btn-add-designs:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .admin-gallery-item:hover .item-actions {
@@ -1303,6 +1339,23 @@ td {
 
 .btn-delete:hover {
     background: #ff6b81;
+}
+
+.btn-edit {
+    background: #4b5563;
+    /* Grayish blue for edit */
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.btn-edit:hover {
+    background: var(--admin-primary);
 }
 
 .btn-download {

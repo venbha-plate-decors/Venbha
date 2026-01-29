@@ -3,7 +3,7 @@ import './Gallery.css';
 import { fetchGalleryImages, fetchHomeGalleryImages } from '../lib/databaseUtils';
 
 const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhotosTitle = true }) => {
-    const [selectedImage, setSelectedImage] = React.useState(null);
+    const [selectedItem, setSelectedItem] = React.useState(null);
     const [galleryImages, setGalleryImages] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
@@ -14,6 +14,7 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
             if (storageKey === 'galleryImages') {
                 const imagesResult = await fetchGalleryImages();
                 if (imagesResult.success) setGalleryImages(imagesResult.data || []);
+
             } else if (storageKey === 'homeGalleryImages') {
                 const result = await fetchHomeGalleryImages();
                 if (result.success) setGalleryImages(result.data || []);
@@ -32,13 +33,13 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
         return () => window.removeEventListener('galleryUpdated', handleGalleryUpdate);
     }, [loadGalleryData]);
 
-    const openLightbox = (image) => {
-        setSelectedImage(image);
+    const openLightbox = (item) => {
+        setSelectedItem(item);
         document.body.style.overflow = 'hidden';
     };
 
     const closeLightbox = () => {
-        setSelectedImage(null);
+        setSelectedItem(null);
         document.body.style.overflow = 'auto';
     };
 
@@ -73,7 +74,7 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
             </div>
 
             {/* Lightbox */}
-            {selectedImage && (
+            {selectedItem && (
                 <div className="lightbox" onClick={closeLightbox}>
                     <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
                         <button className="lightbox-close" onClick={closeLightbox}>
@@ -84,7 +85,20 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
                         </button>
 
                         <div className="lightbox-image-wrapper">
-                            <img src={selectedImage.url || selectedImage.src} alt={selectedImage.alt} />
+                            {selectedItem.type === 'video' ? (
+                                <video
+                                    src={selectedItem.url}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    preload="metadata"
+                                    crossOrigin="anonymous"
+                                    className="lightbox-video"
+                                    style={{ maxHeight: '80vh', maxWidth: '100%' }}
+                                />
+                            ) : (
+                                <img src={selectedItem.url || selectedItem.src} alt={selectedItem.alt} />
+                            )}
                         </div>
                     </div>
                 </div>

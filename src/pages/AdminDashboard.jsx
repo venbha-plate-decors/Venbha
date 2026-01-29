@@ -4,7 +4,11 @@ import { Helmet } from 'react-helmet-async';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadImageToStorage, deleteImageFromStorage } from '../lib/storageUtils';
+import { uploadImageToStorage, deleteImageFromStorage, uploadVideoToStorage } from '../lib/storageUtils';
+
+// ... (existing code)
+
+
 import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import './AdminDashboard.css';
@@ -58,6 +62,8 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState(() => {
         return localStorage.getItem('adminActiveTab') || 'dashboard';
     });
+
+
 
     // Save activeTab to localStorage whenever it changes
     useEffect(() => {
@@ -382,6 +388,7 @@ const AdminDashboard = () => {
 
 
 
+
             // Load home gallery images
             const homeResult = await fetchHomeGalleryImages();
             if (homeResult.success) {
@@ -641,10 +648,7 @@ const AdminDashboard = () => {
                 }
 
                 // Update state
-
-                if (deleteItem.type === 'image') {
-                    setGalleryImages(galleryImages.filter(img => img.id !== deleteItem.id));
-                }
+                setGalleryImages(galleryImages.filter(img => img.id !== deleteItem.id));
 
                 window.dispatchEvent(new Event('galleryUpdated'));
                 setPopupMessage('Item deleted successfully!');
@@ -721,6 +725,8 @@ const AdminDashboard = () => {
             setDeleteItem(null);
         }
     };
+
+
 
     // Home Gallery Handlers
     const handleAddHomeImage = async (e) => {
@@ -799,10 +805,7 @@ const AdminDashboard = () => {
             items = [...galleryImages];
             setItems = setGalleryImages;
             updateDb = updateGalleryOrder;
-        } else if (listType === 'video') {
-            items = [...galleryVideos];
-            setItems = setGalleryVideos;
-            updateDb = updateGalleryOrder;
+
         } else if (listType === 'home') {
             items = [...homeGalleryImages];
             setItems = setHomeGalleryImages;
@@ -914,6 +917,9 @@ const AdminDashboard = () => {
             }
         }
     };
+
+
+
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
@@ -1437,12 +1443,14 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            <div className="admin-card add-image-section">
-                <h3>Add New Media</h3>
 
+
+            {/* Photos Section */}
+            <div className="admin-card add-image-section">
+                <h3>Add New Photos</h3>
                 <form onSubmit={handleAddMedia} className="add-image-form">
                     <div className="form-group">
-                        <label>Upload Photos from Device (Multiple allowed)</label>
+                        <label>Upload Photos (Multiple allowed)</label>
                         <input
                             id="media-upload"
                             type="file"

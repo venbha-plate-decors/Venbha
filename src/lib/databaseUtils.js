@@ -25,30 +25,7 @@ export const fetchGalleryImages = async () => {
     }
 };
 
-/**
- * Fetch all gallery videos from database
- * @returns {Promise<{success: boolean, data?: array, error?: any}>}
- */
-export const fetchGalleryVideos = async () => {
-    try {
-        const { data, error } = await supabase
-            .from('gallery_images')
-            .select('*')
-            .eq('type', 'video')
-            .order('display_order', { ascending: false })
-            .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Fetch error:', error);
-            return { success: false, error };
-        }
-
-        return { success: true, data: data || [] };
-    } catch (error) {
-        console.error('Fetch error:', error);
-        return { success: false, error };
-    }
-};
 
 /**
  * Add a new gallery item to database
@@ -84,6 +61,8 @@ export const addGalleryItem = async (itemData) => {
     }
 };
 
+
+
 /**
  * Delete a gallery item from database
  * @param {string} id - Item ID
@@ -107,6 +86,8 @@ export const deleteGalleryItem = async (id) => {
         return { success: false, error };
     }
 };
+
+
 
 /**
  * Fetch home gallery images from database
@@ -199,7 +180,7 @@ export const updateGalleryOrder = async (items) => {
     try {
         const updates = items.map((item, index) =>
             supabase
-                .from('gallery_images')
+                .from('gallery_images') // Only update gallery_images here
                 .update({ display_order: items.length - index })
                 .eq('id', item.id)
         );
@@ -211,6 +192,13 @@ export const updateGalleryOrder = async (items) => {
         return { success: false, error };
     }
 };
+
+/**
+ * Update display order for gallery videos
+ * @param {Array} items - Array of {id, display_order}
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+
 
 /**
  * Update display order for home gallery images

@@ -1277,10 +1277,70 @@ td {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
     padding: 1rem;
     display: flex;
-    justify-content: flex-end;
-    opacity: 0;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 1;
     transition: opacity 0.2s;
     z-index: 2;
+}
+
+/* Collection Item Actions Structure */
+.collection-info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.collection-name-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.reorder-arrows-top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-arrow {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    /* Make them circular for better corner aesthetic */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-arrow:hover:not(:disabled) {
+    background: black;
+    transform: scale(1.1);
+    color: white;
+}
+
+.btn-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.collection-action-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .collection-overlay-center {
@@ -1730,6 +1790,60 @@ td {
     background: #db2777;
 }
 
+/* Enhanced Popup Form Styles */
+.popup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+}
+
+.popup-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.popup-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-left: 4px;
+}
+
+.popup-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fdfdfd;
+}
+
+.popup-input:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
+}
+
+.popup-file-input {
+    width: 100%;
+    padding: 10px;
+    background: #f8f8f8;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.popup-file-input:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+
+
 /* Delete Confirmation Popup Styles */
 .delete-confirm {
     max-width: 450px;
@@ -1872,4 +1986,43 @@ td {
     max-width: 220px;
     display: block;
     margin: 0 auto;
+}
+
+/* Design Item Actions - specific to Designs tab */
+.design-item-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.design-item-actions div {
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.admin-gallery-item:hover .design-item-actions {
+    opacity: 1;
+}
+
+/* Ensure consistent card sizing even with one item */
+.admin-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* If only one child, limit its max-width so it looks like a card, not a banner */
+.admin-gallery-grid:has(> :only-child) {
+    grid-template-columns: minmax(250px, 350px);
 }

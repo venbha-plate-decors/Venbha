@@ -111,7 +111,7 @@
 
 .collection-card:hover .collection-title {
     transform: translateY(-5px);
-    color: #ffd1dc;
+    color: #ffffff;
 }
 
 .explore-btn {
@@ -206,5 +206,118 @@
     .explore-btn {
         opacity: 0.9;
         transform: translateY(0);
+    }
+}
+
+/* Designs View Styles */
+.designs-view {
+    width: 100%;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color, #c2185b);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: translateX(-5px);
+}
+
+.designs-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.designs-header h2 {
+    font-size: 2.5rem;
+    color: var(--primary-color, #c2185b);
+    margin-bottom: 10px;
+}
+
+.designs-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.designs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+}
+
+.design-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.design-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.design-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    /* Square images often look good for designs/plates */
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.design-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.design-card:hover .design-img {
+    transform: scale(1.05);
+}
+
+.design-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.design-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.plate-count {
+    font-size: 0.9rem;
+    color: #e91e63;
+    font-weight: 600;
+    background: rgba(233, 30, 99, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .designs-header h2 {
+        font-size: 2rem;
+    }
+
+    .designs-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
     }
 }

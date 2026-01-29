@@ -91,7 +91,8 @@ export const uploadImageToStorage = async (file, bucket = 'Gallery', folder = 'i
             .from(bucket)
             .upload(filePath, compressedFile, {
                 cacheControl: '3600',
-                upsert: false
+                upsert: false,
+                contentType: 'image/jpeg'
             });
 
         if (error) {
@@ -153,12 +154,22 @@ export const uploadVideoToStorage = async (file, bucket = 'Gallery', folder = 'v
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${folder}/${fileName}`;
 
+        // Determine mime type
+        let mimeType = file.type;
+        if (!mimeType) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'mp4') mimeType = 'video/mp4';
+            if (ext === 'webm') mimeType = 'video/webm';
+            if (ext === 'mov') mimeType = 'video/quicktime';
+        }
+
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
             .from(bucket)
             .upload(filePath, file, {
                 cacheControl: '3600',
-                upsert: false
+                upsert: false,
+                contentType: mimeType || 'video/mp4' // Default fallback
             });
 
         if (error) {

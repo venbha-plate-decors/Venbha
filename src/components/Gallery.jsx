@@ -1,13 +1,10 @@
 import React from 'react';
 import './Gallery.css';
-import { fetchGalleryImages, fetchGalleryVideos, fetchHomeGalleryImages } from '../lib/databaseUtils';
-
+import { fetchGalleryImages, fetchHomeGalleryImages } from '../lib/databaseUtils';
 
 const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhotosTitle = true }) => {
     const [selectedImage, setSelectedImage] = React.useState(null);
-    const [selectedVideo, setSelectedVideo] = React.useState(null);
     const [galleryImages, setGalleryImages] = React.useState([]);
-    const [galleryVideos, setGalleryVideos] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
     const loadGalleryData = React.useCallback(async () => {
@@ -15,30 +12,14 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
 
         try {
             if (storageKey === 'galleryImages') {
-                // Fetch main gallery images and videos from Supabase
-                const [imagesResult, videosResult] = await Promise.all([
-                    fetchGalleryImages(),
-                    fetchGalleryVideos()
-                ]);
-
-                if (imagesResult.success) {
-                    setGalleryImages(imagesResult.data || []);
-                }
-
-                if (videosResult.success) {
-                    setGalleryVideos(videosResult.data || []);
-                }
+                const imagesResult = await fetchGalleryImages();
+                if (imagesResult.success) setGalleryImages(imagesResult.data || []);
             } else if (storageKey === 'homeGalleryImages') {
-                // Fetch home gallery images from Supabase
                 const result = await fetchHomeGalleryImages();
-
-                if (result.success) {
-                    setGalleryImages(result.data || []);
-                }
+                if (result.success) setGalleryImages(result.data || []);
             }
         } catch (error) {
             console.error('Error loading gallery:', error);
-            setGalleryImages([]);
         } finally {
             setLoading(false);
         }
@@ -46,17 +27,9 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
 
     React.useEffect(() => {
         loadGalleryData();
-
-        // Listen for updates from Admin Dashboard
-        const handleGalleryUpdate = () => {
-            loadGalleryData();
-        };
-
+        const handleGalleryUpdate = () => loadGalleryData();
         window.addEventListener('galleryUpdated', handleGalleryUpdate);
-
-        return () => {
-            window.removeEventListener('galleryUpdated', handleGalleryUpdate);
-        };
+        return () => window.removeEventListener('galleryUpdated', handleGalleryUpdate);
     }, [loadGalleryData]);
 
     const openLightbox = (image) => {
@@ -64,14 +37,8 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
         document.body.style.overflow = 'hidden';
     };
 
-    const openVideoLightbox = (video) => {
-        setSelectedVideo(video);
-        document.body.style.overflow = 'hidden';
-    };
-
     const closeLightbox = () => {
         setSelectedImage(null);
-        setSelectedVideo(null);
         document.body.style.overflow = 'auto';
     };
 
@@ -103,54 +70,26 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
                         </div>
                     ))}
                 </div>
-
-                {galleryVideos.length > 0 && (
-                    <div className="video-section">
-                        <div className="section-subtitle">Videos</div>
-                        <div className="gallery-grid video-grid">
-                            {galleryVideos.map((video, index) => (
-                                <VideoCard key={video.id || index} video={video} onPlay={() => openVideoLightbox(video)} />
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
 
-            {(selectedImage || selectedVideo) && (
+            {/* Lightbox */}
+            {selectedImage && (
                 <div className="lightbox" onClick={closeLightbox}>
                     <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-                        <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
-                        {selectedImage ? (
+                        <button className="lightbox-close" onClick={closeLightbox}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        <div className="lightbox-image-wrapper">
                             <img src={selectedImage.url || selectedImage.src} alt={selectedImage.alt} />
-                        ) : (
-                            <video
-                                src={selectedVideo.url || selectedVideo.src}
-                                controls
-                                autoPlay
-                                style={{ maxWidth: '100%', maxHeight: '90vh', boxShadow: '0 5px 25px rgba(0,0,0,0.5)' }}
-                            ></video>
-                        )}
+                        </div>
                     </div>
                 </div>
             )}
         </section>
-    );
-};
-
-const VideoCard = ({ video, onPlay }) => {
-    return (
-        <div className="modern-video-card" onClick={onPlay}>
-            <video
-                src={video.url || video.src}
-                preload="metadata"
-                className="video-thumbnail"
-            ></video>
-            <div className="video-overlay">
-                <div className="play-button">
-                    <div className="play-icon"></div>
-                </div>
-            </div>
-        </div>
     );
 };
 

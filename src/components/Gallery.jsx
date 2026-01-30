@@ -85,20 +85,7 @@ const Gallery = ({ storageKey = 'galleryImages', title = 'Our Gallery', showPhot
                         </button>
 
                         <div className="lightbox-image-wrapper">
-                            {selectedItem.type === 'video' ? (
-                                <video
-                                    src={selectedItem.url}
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                    preload="metadata"
-                                    crossOrigin="anonymous"
-                                    className="lightbox-video"
-                                    style={{ maxHeight: '80vh', maxWidth: '100%' }}
-                                />
-                            ) : (
-                                <img src={selectedItem.url || selectedItem.src} alt={selectedItem.alt} />
-                            )}
+                            <img src={selectedItem.url || selectedItem.src} alt={selectedItem.alt} />
                         </div>
                     </div>
                 </div>

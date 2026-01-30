@@ -290,26 +290,17 @@
 }
 
 .design-info {
-    padding: 20px;
+    padding: 12px 15px;
     text-align: center;
 }
 
 .design-info h3 {
     font-size: 1.2rem;
-    margin-bottom: 5px;
+    margin-bottom: 0;
     color: #333;
 }
 
-.plate-count {
-    font-size: 0.9rem;
-    color: #e91e63;
-    font-weight: 600;
-    background: rgba(233, 30, 99, 0.1);
-    padding: 4px 12px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-top: 5px;
-}
+
 
 @media (max-width: 768px) {
     .designs-header h2 {

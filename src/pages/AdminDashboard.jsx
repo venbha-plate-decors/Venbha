@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadImageToStorage, deleteImageFromStorage, uploadVideoToStorage } from '../lib/storageUtils';
+import { uploadImageToStorage, deleteImageFromStorage } from '../lib/storageUtils';
 
 // ... (existing code)
 
@@ -73,6 +73,7 @@ const AdminDashboard = () => {
     // Gallery State
     const [galleryImages, setGalleryImages] = useState([]);
     const [homeGalleryImages, setHomeGalleryImages] = useState([]);
+    const [galleryVideos, setGalleryVideos] = useState([]); // Add this line
     const [collections, setCollections] = useState([]);
     const [collectionForm, setCollectionForm] = useState({ name: '', image: null });
     const [isSubmittingCollection, setIsSubmittingCollection] = useState(false);
@@ -1243,15 +1244,10 @@ const AdminDashboard = () => {
             <div className="stats-grid">
                 <div className="stat-card" onClick={() => setActiveTab('contact-inquiries')}>
                     <div className="stat-info">
-                        <h3>Enquiries</h3>
+                        <h3>Contact Enquiries</h3>
                         <p className="stat-value">{contactEntries.length}</p>
                     </div>
-                </div>
-                <div className="stat-card" onClick={() => setActiveTab('gallery')}>
-                    <div className="stat-info">
-                        <h3>Media</h3>
-                        <p className="stat-value">{galleryImages.length + galleryVideos.length}</p>
-                    </div>
+                    <button className="view-more-btn">View More →</button>
                 </div>
                 <div className="stat-card" onClick={() => setActiveTab('collections')}>
                     <div className="stat-info">

@@ -185,7 +185,7 @@ const Designs = () => {
                                         </div>
                                         <div className="design-info">
                                             <h3>{design.name}</h3>
-                                            {design.plate_count && <p className="plate-count">{design.plate_count} Sets</p>}
+
                                         </div>
                                     </motion.div>
                                 ))}

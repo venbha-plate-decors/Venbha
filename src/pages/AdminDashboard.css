@@ -2026,3 +2026,22 @@ td {
 .admin-gallery-grid:has(> :only-child) {
     grid-template-columns: minmax(250px, 350px);
 }
+
+.view-more-btn {
+    background: none;
+    border: 1px solid var(--admin-primary);
+    color: var(--admin-primary);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    align-self: center;
+    white-space: nowrap;
+}
+
+.view-more-btn:hover {
+    background: var(--admin-primary);
+    color: white;
+}

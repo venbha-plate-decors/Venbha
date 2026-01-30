@@ -280,6 +280,7 @@
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
     margin-bottom: 3rem;
+    max-width: 1200px;
 }
 
 .stat-card {
@@ -289,7 +290,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     transition: transform 0.3s ease;
 }
 
@@ -403,6 +404,63 @@ td {
     padding: 1rem;
     border-bottom: 1px solid #f9f9f9;
     color: #333;
+    vertical-align: top;
+}
+
+/* Column Specific Widths */
+th:nth-child(1),
+td:nth-child(1) {
+    width: 15%;
+}
+
+/* Name */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 15%;
+}
+
+/* Email */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 12%;
+}
+
+/* Phone */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 25%;
+}
+
+/* Message */
+th:nth-child(5),
+td:nth-child(5) {
+    width: 10%;
+}
+
+/* Date */
+th:nth-child(6),
+td:nth-child(6) {
+    width: 8%;
+}
+
+/* Notes */
+th:nth-child(7),
+td:nth-child(7) {
+    width: 10%;
+}
+
+/* Actions */
+th:nth-child(8),
+td:nth-child(8) {
+    width: 5%;
+}
+
+/* Status */
+
+td[data-label="Message"] {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 
@@ -1013,27 +1071,17 @@ td {
         font-size: 1.5rem;
     }
 
-    /* Stack form elements and fix button alignment */
     .add-image-form {
         grid-template-columns: 1fr;
-        align-items: stretch;
     }
 
-    .add-image-form .btn-primary {
-        margin-bottom: 0;
-        margin-top: 15px;
-    }
-
-    /* Fix overflow for dropdowns in mobile */
-    .table-container {
-        overflow: visible !important;
-    }
-
+    /* Reset overflow */
+    .table-container,
     .recent-orders {
         overflow: visible !important;
     }
 
-    /* Responsive Table Transformation */
+    /* Table to Card Transformation */
     table,
     thead,
     tbody,
@@ -1043,113 +1091,130 @@ td {
         display: block;
     }
 
-    table {
-        overflow: visible !important;
-    }
-
-    tbody {
-        overflow: visible !important;
-    }
-
-    /* Hide table headers (but not display:none for accessibility) */
+    /* Hide Header */
     thead tr {
         position: absolute;
         top: -9999px;
         left: -9999px;
     }
 
+    /* Card Style for Rows */
     tr {
-        margin-bottom: 1.5rem;
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        border: 1px solid #f0f0f0;
-        padding: 1rem 0;
-        overflow: visible !important;
-        position: relative;
-        z-index: 1;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f3f4f6;
     }
 
-    /* Increase z-index for rows with open dropdowns */
-    tr:has(select:focus) {
-        z-index: 100;
+    .desktop-row-label {
+        display: none !important;
     }
 
+    /* Individual "Cells" */
     td {
-        /* Behave like a "row" */
         border: none;
-        border-bottom: 1px solid #f9fafb;
+        padding: 0.75rem 0;
         position: relative;
-        padding: 0.9rem 1.5rem;
-        text-align: right;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        min-height: 52px;
-    }
-
-    td::before {
-        /* Label becomes a flex item on the left */
-        position: static;
-        transform: none;
-        width: auto;
-        padding-right: 12px;
-        white-space: nowrap;
         text-align: left;
-        font-weight: 600;
-        color: #64748b;
-        content: attr(data-label);
-        font-size: 0.9rem;
-        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border-bottom: 1px solid #f9fafb;
+        width: 100% !important;
+        /* Override desktop specific widths */
+        box-sizing: border-box;
     }
 
     td:last-child {
         border-bottom: none;
-        padding-bottom: 1.2rem;
+        padding-bottom: 0;
     }
 
     td:first-child {
-        padding-top: 1.2rem;
-        border-top-left-radius: 16px;
-        border-top-right-radius: 16px;
+        padding-top: 0;
     }
 
-    /* Handle long text in message - Display label on left and content on right */
-    td[data-label="Message"] {
-        flex-direction: row;
+    /* Labels */
+    td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    /* Content Styling */
+    .cell-content,
+    td>div {
+        width: 100%;
+        text-align: left;
         align-items: flex-start;
-        text-align: right;
-        gap: 0.5rem;
+    }
+
+    .cell-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    /* Specific Cell Overrides */
+
+    /* Contact & Design Info */
+    td[data-label="Contact"],
+    td[data-label="Design Info"] {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Message - Allow full width */
+    td[data-label="Message"] {
+        display: block;
+        /* Let text wrap naturally */
+        width: 100%;
+        word-break: break-word;
+        /* Only break words in message */
     }
 
     td[data-label="Message"]::before {
-        font-size: 0.85rem;
-        color: #94a3b8;
-        flex-shrink: 0;
+        margin-bottom: 0.5rem;
     }
 
-    /* Action buttons alignment */
+    /* Date - Ensure it doesn't wrap unnecessarily */
+    td[data-label="Date"] {
+        white-space: normal;
+        /* Let it flow */
+        flex-direction: column;
+    }
+
+    /* Actions & Notes - Flex row for buttons */
     td[data-label="Actions"]>div,
     td[data-label="Notes"]>div {
-        justify-content: flex-end;
-        /* No width: 100% needed with space-between */
+        display: flex !important;
+        /* Force flex display */
+        flex-direction: row !important;
+        /* Force row direction */
+        justify-content: flex-start !important;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        width: 100%;
+        margin-top: 0.25rem;
     }
 
-    /* Status dropdown mobile styling - Fix overflow */
+    /* Status Dropdown */
     td[data-label="Status"] {
-        align-items: center;
-        overflow: visible !important;
-        position: relative;
-        z-index: 50;
+        padding-bottom: 0.5rem;
+        overflow: visible;
     }
 
     td[data-label="Status"] .status-dropdown {
-        min-width: auto;
         width: 100%;
-        max-width: none;
-        flex: 1;
-        position: relative;
-        z-index: 100;
+        max-width: 100%;
+        padding: 10px;
     }
 }
 
@@ -2041,7 +2106,105 @@ td {
     white-space: nowrap;
 }
 
-.view-more-btn:hover {
-    background: var(--admin-primary);
-    color: white;
+/* Desktop Single Row Layout for Contact Enquiries */
+@media (min-width: 769px) {
+    .contact-enquiries-table {
+        border-collapse: collapse;
+        display: table;
+        width: 100%;
+    }
+
+    .contact-enquiries-table tbody {
+        display: table-row-group;
+        width: 100%;
+        margin-top: 0;
+    }
+
+    .contact-enquiries-table thead tr {
+        display: table-row;
+    }
+
+    .contact-enquiries-table tbody tr {
+        display: table-row;
+        width: auto;
+        border-bottom: 1px solid #eee;
+        background: transparent;
+        transition: background 0.2s;
+        margin-bottom: 0;
+        box-shadow: none;
+        border-radius: 0;
+        border: none;
+        padding-top: 0;
+    }
+
+    .contact-enquiries-table tbody tr:hover {
+        background: #fdfdfd;
+        transform: none;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    .contact-enquiries-table td {
+        vertical-align: middle;
+        padding: 1rem 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Column Widths */
+    /* Name */
+    .contact-enquiries-table th:nth-child(1),
+    .contact-enquiries-table td:nth-child(1) {
+        width: 15%;
+    }
+
+    /* Contact (Phone + Email) */
+    .contact-enquiries-table th:nth-child(2),
+    .contact-enquiries-table td:nth-child(2) {
+        width: 20%;
+    }
+
+    /* Message */
+    .contact-enquiries-table th:nth-child(3),
+    .contact-enquiries-table td:nth-child(3) {
+        width: 25%;
+    }
+
+    /* Date */
+    .contact-enquiries-table th:nth-child(4),
+    .contact-enquiries-table td:nth-child(4) {
+        width: 12%;
+        white-space: nowrap;
+    }
+
+    /* Notes */
+    .contact-enquiries-table th:nth-child(5),
+    .contact-enquiries-table td:nth-child(5) {
+        width: 8%;
+        text-align: center;
+    }
+
+    /* Actions */
+    .contact-enquiries-table th:nth-child(6),
+    .contact-enquiries-table td:nth-child(6) {
+        width: 10%;
+        text-align: center;
+    }
+
+    /* Status */
+    .contact-enquiries-table th:nth-child(7),
+    .contact-enquiries-table td:nth-child(7) {
+        width: 10%;
+        text-align: center;
+    }
+
+    /* Override flex displays from previous multi-row setup */
+    .contact-enquiries-table td:nth-child(5),
+    .contact-enquiries-table td:nth-child(6),
+    .contact-enquiries-table td:nth-child(7) {
+        display: table-cell;
+        border-top: none;
+        margin-top: 0;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
 }

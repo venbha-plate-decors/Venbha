@@ -258,46 +258,98 @@
 
 .design-card {
     background: white;
-    border-radius: 15px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    position: relative;
+    height: 350px;
+    /* Fixed height for uniformity */
+    display: flex;
+    flex-direction: column;
 }
 
 .design-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(233, 30, 99, 0.1);
+    border-color: rgba(233, 30, 99, 0.1);
 }
 
 .design-image-wrapper {
     width: 100%;
-    aspect-ratio: 1;
-    /* Square images often look good for designs/plates */
+    height: 100%;
+    position: relative;
     overflow: hidden;
     cursor: pointer;
+}
+
+/* Hover Overlay */
+.design-image-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transition: background 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.design-card:hover .design-image-wrapper::after {
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .design-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .design-card:hover .design-img {
-    transform: scale(1.05);
+    transform: scale(1.15) rotate(2deg);
 }
 
 .design-info {
-    padding: 12px 15px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 15px;
     text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    /* Liquid/Glass base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    transition: all 0.3s ease;
 }
 
 .design-info h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0;
-    color: #333;
+    color: #fff;
+    /* White text for contrast on liquid usually looks best if bg is dark, but here likely varying images. */
+    /* Let's use dark text with a white glow or just dark text if we assume light images? 
+       Actually with glass on varied images, a text shadow or semitransparent white bg is safer. 
+       Let's stick to darker text but make the glass "milky" enough. */
+    color: #ffffff;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+}
+
+.design-card:hover .design-info {
+    background: rgba(255, 255, 255, 0.25);
+    padding-bottom: 25px;
+    /* Slight lift effect for text area */
+}
+
+.design-card:hover .design-info h3 {
+    color: #ffffff;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    /* Slightly deeper shadow on hover for effect */
 }
 
 
@@ -311,4 +363,197 @@
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 20px;
     }
+}
+
+/* Zoom Icon */
+.zoom-icon-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.design-card:hover .zoom-icon-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.zoom-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -30px;
+    right: -40px;
+    background: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    color: #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.lightbox-close:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .lightbox-close {
+        top: -30px;
+        right: 0;
+    }
+}
+
+/* Inquiry Modal Styles */
+.inquiry-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.inquiry-form-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.inquiry-form-header h2 {
+    color: var(--primary-color, #c2185b);
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.inquiry-form-header p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.inquiry-form-group {
+    margin-bottom: 15px;
+}
+
+.inquiry-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #444;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.inquiry-form-group input,
+.inquiry-form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9f9f9;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.inquiry-form-group input:focus,
+.inquiry-form-group textarea:focus {
+    border-color: var(--primary-color, #c2185b);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+}
+
+.btn-submit-inquiry {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(45deg, #e91e63, #c2185b);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-submit-inquiry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f0f0f0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    color: #555;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #ddd;
+    color: #333;
 }

@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './Testimonials.css';
+import testimonialImg1 from '../assets/testimonial1.jpg';
+import testimonialImg2 from '../assets/testimonial2.jpg';
+import testimonialImg3 from '../assets/testimonial3.jpg';
 
 // Import images or use placeholders if they don't exist yet
 // Ideally we would import them, but if they are not there, the build might fail or show error.
@@ -14,21 +17,21 @@ const testimonials = [
         id: 1,
         name: 'Anitha Krishnan',
         role: 'Bride',
-        image: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Anitha&skinColor=brown&clothing=saree&eyes=happy&mouth=smile',
+        image: testimonialImg1,
         text: "Venbha's designs transformed our wedding completely. The attention to detail in the seer thattu decoration was simply unmatched. Truly a dream come true!"
     },
     {
         id: 2,
         name: 'Karthik Raja',
         role: 'Happy Father',
-        image: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Karthik&skinColor=brown&facialHair=beardLight&clothing=shirtCrewNeck&eyes=happy',
+        image: testimonialImg2,
         text: "Exceptional quality and service. They perfectly understood our traditional requirements and delivered a modern yet culturally rooted aesthetic. Highly recommended!"
     },
     {
         id: 3,
         name: 'Meera Sundaram',
         role: 'Event Planner',
-        image: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Meera&skinColor=brown&top=longHairStraight&eyes=happy&mouth=smile',
+        image: testimonialImg3,
         text: "From concept to execution, everything was seamless. The unique color combinations they suggested brought so much life to the event. Thank you, Venbha!"
     }
 ];

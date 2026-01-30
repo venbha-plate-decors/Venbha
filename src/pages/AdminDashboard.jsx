@@ -9,8 +9,9 @@ import { uploadImageToStorage, deleteImageFromStorage } from '../lib/storageUtil
 // ... (existing code)
 
 
-import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign } from '../lib/databaseUtils';
+import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign, updateDesign } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
+import { fetchCollectionEntries, updateCollectionWorkflowStatus as updateColStatus, updateCollectionNotes as updateColNotes, deleteCollectionEntry as deleteColEntry } from '../lib/collectionUtils';
 import './AdminDashboard.css';
 import logo from '../assets/venbha_logo_circled.png';
 
@@ -110,6 +111,16 @@ const AdminDashboard = () => {
     const [designs, setDesigns] = useState([]);
     const [designForm, setDesignForm] = useState({ name: '', image: null, plate_count: '' });
     const [isSubmittingDesign, setIsSubmittingDesign] = useState(false);
+    // Edit Design Modal State
+    const [editDesignModal, setEditDesignModal] = useState({
+        isOpen: false,
+        id: null,
+        name: '',
+        plate_count: '',
+        image: null,
+        currentImage: '',
+        storagePath: ''
+    });
 
 
 
@@ -152,24 +163,27 @@ const AdminDashboard = () => {
 
     // Contact Entries State
     const [contactEntries, setContactEntries] = useState([]);
+    const [collectionEntries, setCollectionEntries] = useState([]);
 
     // Notes Modal State
     const [notesModal, setNotesModal] = useState({
         isOpen: false,
         mode: 'edit', // 'edit' or 'view'
         entryId: null,
-        notes: ''
+        notes: '',
+        type: 'contact'
     });
 
     // Export Modal State
     const [showExportModal, setShowExportModal] = useState(false);
 
-    const openNotesModal = (entry, mode) => {
+    const openNotesModal = (entry, mode, type = 'contact') => {
         setNotesModal({
             isOpen: true,
             mode: mode,
             entryId: entry.id,
-            notes: entry.notes || ''
+            notes: entry.notes || '',
+            type: type
         });
     };
 
@@ -259,13 +273,24 @@ const AdminDashboard = () => {
     };
 
     const handleSaveNotes = async () => {
-        const result = await updateContactNotes(notesModal.entryId, notesModal.notes);
+        let result;
+        if (notesModal.type === 'collection') {
+            result = await updateColNotes(notesModal.entryId, notesModal.notes);
+            if (result.success) {
+                setCollectionEntries(prev => prev.map(entry =>
+                    entry.id === notesModal.entryId ? { ...entry, notes: notesModal.notes } : entry
+                ));
+            }
+        } else {
+            result = await updateContactNotes(notesModal.entryId, notesModal.notes);
+            if (result.success) {
+                setContactEntries(prev => prev.map(entry =>
+                    entry.id === notesModal.entryId ? { ...entry, notes: notesModal.notes } : entry
+                ));
+            }
+        }
 
         if (result.success) {
-            // Update local state
-            setContactEntries(prev => prev.map(entry =>
-                entry.id === notesModal.entryId ? { ...entry, notes: notesModal.notes } : entry
-            ));
             setPopupMessage('Notes saved successfully!');
             setShowPopup(true);
             setTimeout(() => setShowPopup(false), 2000);
@@ -281,15 +306,35 @@ const AdminDashboard = () => {
         setShowDeleteConfirm(true);
     };
 
+    const handleDeleteCollectionEntry = (id) => {
+        setDeleteItem({ id, handler: 'collection_enquiry' });
+        setShowDeleteConfirm(true);
+    };
+
 
     const handleWorkflowStatusChange = async (id, newStatus) => {
         // Allow empty string (Select option) to update database to NULL
         const result = await updateContactWorkflowStatus(id, newStatus === '' ? null : newStatus);
 
         if (result.success) {
-            // Update local state
             setContactEntries(prev => prev.map(entry =>
-                entry.id === id ? { ...entry, workflow_status: newStatus === '' ? null : newStatus } : entry
+                entry.id === id ? { ...entry, workflow_status: newStatus } : entry
+            ));
+            setPopupMessage('Status updated successfully!');
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 2000);
+        } else {
+            setPopupMessage('Failed to update status');
+            setShowPopup(true);
+        }
+    };
+
+    const handleCollectionWorkflowStatusChange = async (id, newStatus) => {
+        const result = await updateColStatus(id, newStatus === '' ? null : newStatus);
+
+        if (result.success) {
+            setCollectionEntries(prev => prev.map(entry =>
+                entry.id === id ? { ...entry, workflow_status: newStatus } : entry
             ));
             setPopupMessage('Status updated successfully!');
             setShowPopup(true);
@@ -393,6 +438,7 @@ const AdminDashboard = () => {
 
         // Load contact entries from Supabase
         loadContactEntries();
+        loadCollectionEntries();
 
         // Load profile from LocalStorage
         const storedProfile = localStorage.getItem('adminProfile');
@@ -444,6 +490,17 @@ const AdminDashboard = () => {
             }
         } catch (error) {
             console.error('Error loading contact entries:', error);
+        }
+    };
+
+    const loadCollectionEntries = async () => {
+        try {
+            const result = await fetchCollectionEntries();
+            if (result.success) {
+                setCollectionEntries(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading collection entries:', error);
         }
     };
 
@@ -590,7 +647,7 @@ const AdminDashboard = () => {
             setTimeout(() => setShowPopup(false), 2000);
         } catch (error) {
             console.error(error);
-            setPopupMessage('Failed to add design.');
+            setPopupMessage(error.message || 'Failed to add design.');
         } finally {
             setIsSubmittingDesign(false);
         }
@@ -600,6 +657,79 @@ const AdminDashboard = () => {
         setDeleteItem({ id, storagePath, handler: 'design' });
         setShowDeleteConfirm(true);
     };
+
+    const openEditDesignModal = (design) => {
+        setEditDesignModal({
+            isOpen: true,
+            id: design.id,
+            name: design.name,
+            plate_count: design.plate_count,
+            image: null,
+            currentImage: design.image,
+            storagePath: design.storage_path
+        });
+    };
+
+    const closeEditDesignModal = () => {
+        setEditDesignModal({
+            isOpen: false,
+            id: null,
+            name: '',
+            plate_count: '',
+            image: null,
+            currentImage: '',
+            storagePath: ''
+        });
+    };
+
+    const handleUpdateDesign = async (e) => {
+        e.preventDefault();
+        setIsSubmittingDesign(true);
+        setPopupMessage('Updating design...');
+        setShowPopup(true);
+
+        try {
+            let updates = {
+                name: editDesignModal.name,
+                plate_count: editDesignModal.plate_count // Pass as string, DB must be Text
+            };
+
+            if (editDesignModal.image) {
+                // User wants to change image
+                // 1. Delete old image
+                if (editDesignModal.storagePath) {
+                    await deleteImageFromStorage(editDesignModal.storagePath);
+                }
+
+                // 2. Upload new image
+                const uploadResult = await uploadImageToStorage(editDesignModal.image, 'Gallery', 'designs');
+                if (!uploadResult.success) throw new Error('Image upload failed');
+
+                updates.image = uploadResult.url;
+                updates.storage_path = uploadResult.path;
+            }
+
+            // 3. Update DB
+            const result = await updateDesign(editDesignModal.id, updates);
+
+            if (result.success) {
+                // Update local state
+                setDesigns(designs.map(d => d.id === editDesignModal.id ? result.data : d));
+                setPopupMessage('Design updated successfully!');
+                setTimeout(() => setShowPopup(false), 2000);
+                closeEditDesignModal();
+            } else {
+                throw new Error(result.error.message || 'Update failed');
+            }
+        } catch (error) {
+            console.error(error);
+            setPopupMessage(error.message || 'Failed to update design.');
+            setTimeout(() => setShowPopup(false), 2000);
+        } finally {
+            setIsSubmittingDesign(false);
+        }
+    };
+
 
     const handleAddMedia = async (e) => {
         e.preventDefault();
@@ -738,6 +868,17 @@ const AdminDashboard = () => {
                     setTimeout(() => setShowPopup(false), 2000);
                 } else {
                     throw new Error('Failed to delete contact entry');
+                }
+            } else if (deleteItem.handler === 'collection_enquiry') {
+                const result = await deleteColEntry(deleteItem.id);
+
+                if (result.success) {
+                    setCollectionEntries(prev => prev.filter(entry => entry.id !== deleteItem.id));
+                    setPopupMessage('Collection entry deleted successfully!');
+                    setShowPopup(true);
+                    setTimeout(() => setShowPopup(false), 2000);
+                } else {
+                    throw new Error('Failed to delete collection entry');
                 }
             } else if (deleteItem.handler === 'design') {
                 const dbResult = await deleteDesign(deleteItem.id);
@@ -1014,189 +1155,392 @@ const AdminDashboard = () => {
 
 
 
-    const renderContactInquiries = () => (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="gallery-manager"
-        >
-            <div className="dashboard-header">
-                <div className="header-left">
-                    <button className="menu-toggle-btn" onClick={toggleSidebar}>
-                        ☰
-                    </button>
-                    <div className="header-title">
-                        <h1>Contact Enquiries</h1>
-                        <p>View and manage messages from the contact form.</p>
-                    </div>
-                </div>
-                <div className="header-actions">
-                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
-                        <span className="bell-icon">🔔</span>
-                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
-                            <span className="notification-badge">
-                                {contactEntries.filter(entry => entry.status === 'new').length}
-                            </span>
-                        )}
-                    </div>
-                    <div className="admin-profile">
-                        {adminProfile.image ? (
-                            <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
-                        ) : (
-                            <div className="admin-avatar">AD</div>
-                        )}
-                        <span className="admin-name">{adminProfile.name}</span>
-                    </div>
-                </div>
-            </div>
-
+    const renderContactInquiries = () => {
+        const filteredEntries = contactEntries.filter(entry => !entry.message || !entry.message.startsWith('[Collection Enquiry]'));
+        return (
             <motion.div
-                className="recent-orders"
-                variants={itemVariants}
-                initial="hidden"
-                animate="show"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="gallery-manager"
             >
-                <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Message</th>
-                                <th>Date</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {contactEntries.map((entry) => (
-                                <tr key={entry.id}>
-                                    <td data-label="Name">{entry.name}</td>
-                                    <td data-label="Email">{entry.email}</td>
-                                    <td data-label="Phone">{entry.phone}</td>
-                                    <td data-label="Message" style={{ maxWidth: '300px', whiteSpace: 'normal' }}>{entry.message}</td>
-                                    <td data-label="Date">{new Date(entry.created_at).toLocaleDateString('en-IN', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}</td>
-                                    <td data-label="Notes">
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                            {entry.notes ? (
-                                                <button
-                                                    className="action-btn view-notes-btn"
-                                                    onClick={() => openNotesModal(entry, 'view')}
-                                                    title="View Notes"
-                                                >
-                                                    👁️
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="action-btn edit-notes-btn"
-                                                    onClick={() => openNotesModal(entry, 'edit')}
-                                                    title="Add Notes"
-                                                >
-                                                    ✏️
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td data-label="Actions">
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <a
-                                                href={`tel:${entry.phone}`}
-                                                className="action-btn call-btn"
-                                                title="Call"
-                                            >
-                                                📞
-                                            </a>
-                                            <a
-                                                href={`mailto:${entry.email}`}
-                                                className="action-btn email-btn"
-                                                title="Send Email"
-                                            >
-                                                ✉️
-                                            </a>
-                                            <button
-                                                className="action-btn delete-btn"
-                                                onClick={() => handleDeleteContact(entry.id)}
-                                                title="Delete"
-                                            >
-                                                🗑
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td data-label="Status">
-                                        <select
-                                            className="status-dropdown"
-                                            value={entry.workflow_status || ''}
-                                            onChange={(e) => handleWorkflowStatusChange(entry.id, e.target.value)}
-                                        >
-                                            <option value="">Select</option>
-                                            <option value="need_to_call">Need to call</option>
-                                            <option value="need_to_share_pictures">Need to Share the pictures</option>
-                                            <option value="waiting_for_confirmation">Waiting for confirmation</option>
-                                            <option value="approved">Approved</option>
-                                            <option value="rejected">Rejected</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))}
-                            {contactEntries.length === 0 && (
-                                <tr>
-                                    <td colSpan="8" style={{ textAlign: 'center' }}>No enquiries found.</td>
-                                </tr>
+                <div className="dashboard-header">
+                    <div className="header-left">
+                        <button className="menu-toggle-btn" onClick={toggleSidebar}>
+                            ☰
+                        </button>
+                        <div className="header-title">
+                            <h1>Contact Enquiries</h1>
+                            <p>View and manage messages from the contact form.</p>
+                        </div>
+                    </div>
+                    <div className="header-actions">
+                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                            <span className="bell-icon">🔔</span>
+                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                                <span className="notification-badge">
+                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                </span>
                             )}
-                        </tbody>
-                    </table>
+                        </div>
+                        <div className="admin-profile">
+                            {adminProfile.image ? (
+                                <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
+                            ) : (
+                                <div className="admin-avatar">AD</div>
+                            )}
+                            <span className="admin-name">{adminProfile.name}</span>
+                        </div>
+                    </div>
                 </div>
-            </motion.div>
 
-            {/* Export Modal */}
-            {showExportModal && (
-                <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
-                    <motion.div
-                        className="modal-content export-modal"
-                        onClick={(e) => e.stopPropagation()}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <div className="modal-header">
-                            <h2>Export Contact Enquiries</h2>
-                            <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
-                        </div>
-                        <div className="modal-body">
-                            <p style={{ marginBottom: '1.5rem', color: '#666' }}>
-                                Choose your preferred export format:
-                            </p>
-                            <div className="export-options">
-                                <button className="export-option-btn excel-btn" onClick={exportToExcel}>
-                                    <span className="export-icon">📊</span>
-                                    <span className="export-label">Excel (.xlsx)</span>
-                                    <span className="export-desc">Best for spreadsheet analysis</span>
-                                </button>
-                                <button className="export-option-btn csv-btn" onClick={exportToCSV}>
-                                    <span className="export-icon">📄</span>
-                                    <span className="export-label">CSV (.csv)</span>
-                                    <span className="export-desc">Universal format</span>
-                                </button>
-                                <button className="export-option-btn json-btn" onClick={exportToJSON}>
-                                    <span className="export-icon">🔧</span>
-                                    <span className="export-label">JSON (.json)</span>
-                                    <span className="export-desc">For developers</span>
-                                </button>
+                <motion.div
+                    className="recent-orders"
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="show"
+                >
+                    <div className="table-container">
+                        <table className="contact-enquiries-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredEntries.map((entry) => (
+                                    <tr key={entry.id}>
+                                        <td data-label="Name">{entry.name}</td>
+                                        <td data-label="Contact">
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontWeight: '500' }}>{entry.phone}</span>
+                                                <span style={{ fontSize: '0.85rem', color: '#666' }}>{entry.email}</span>
+                                            </div>
+                                        </td>
+                                        <td data-label="Message">{entry.message}</td>
+                                        <td data-label="Date">{new Date(entry.created_at).toLocaleDateString('en-IN', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</td>
+                                        <td data-label="Notes">
+                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                {entry.notes ? (
+                                                    <button
+                                                        className="action-btn view-notes-btn"
+                                                        onClick={() => openNotesModal(entry, 'view', 'contact')}
+                                                        title="View Notes"
+                                                    >
+                                                        👁️
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="action-btn edit-notes-btn"
+                                                        onClick={() => openNotesModal(entry, 'edit', 'contact')}
+                                                        title="Add Notes"
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                <a
+                                                    href={`tel:${entry.phone}`}
+                                                    className="action-btn call-btn"
+                                                    title="Call"
+                                                >
+                                                    📞
+                                                </a>
+                                                <a
+                                                    href={`mailto:${entry.email}`}
+                                                    className="action-btn email-btn"
+                                                    title="Send Email"
+                                                >
+                                                    ✉️
+                                                </a>
+                                                <button
+                                                    className="action-btn delete-btn"
+                                                    onClick={() => handleDeleteContact(entry.id)}
+                                                    title="Delete"
+                                                >
+                                                    🗑
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td data-label="Status">
+                                            <select
+                                                className="status-dropdown"
+                                                value={entry.workflow_status || ''}
+                                                onChange={(e) => handleWorkflowStatusChange(entry.id, e.target.value)}
+                                            >
+                                                <option value="">Select</option>
+                                                <option value="need_to_call">Need to call</option>
+                                                <option value="need_to_share_pictures">Need to Share the pictures</option>
+                                                <option value="waiting_for_confirmation">Waiting for confirmation</option>
+                                                <option value="approved">Approved</option>
+                                                <option value="rejected">Rejected</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filteredEntries.length === 0 && (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center' }}>No enquiries found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </motion.div>
+
+                {/* Export Modal */}
+                {showExportModal && (
+                    <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
+                        <motion.div
+                            className="modal-content export-modal"
+                            onClick={(e) => e.stopPropagation()}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <div className="modal-header">
+                                <h2>Export Contact Enquiries</h2>
+                                <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
                             </div>
+                            <div className="modal-body">
+                                <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                                    Choose your preferred export format:
+                                </p>
+                                <div className="export-options">
+                                    <button className="export-option-btn excel-btn" onClick={exportToExcel}>
+                                        <span className="export-icon">📊</span>
+                                        <span className="export-label">Excel (.xlsx)</span>
+                                        <span className="export-desc">Best for spreadsheet analysis</span>
+                                    </button>
+                                    <button className="export-option-btn csv-btn" onClick={exportToCSV}>
+                                        <span className="export-icon">📄</span>
+                                        <span className="export-label">CSV (.csv)</span>
+                                        <span className="export-desc">Universal format</span>
+                                    </button>
+                                    <button className="export-option-btn json-btn" onClick={exportToJSON}>
+                                        <span className="export-icon">🔧</span>
+                                        <span className="export-label">JSON (.json)</span>
+                                        <span className="export-desc">For developers</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </motion.div>
+        );
+    };
+
+    const renderCollectionInquiries = () => {
+        const filteredEntries = collectionEntries;
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="gallery-manager"
+            >
+                <div className="dashboard-header">
+                    <div className="header-left">
+                        <button className="menu-toggle-btn" onClick={toggleSidebar}>
+                            ☰
+                        </button>
+                        <div className="header-title">
+                            <h1>Collection Enquiries</h1>
+                            <p>View and manage enquiries from the collections page.</p>
                         </div>
-                    </motion.div>
+                    </div>
+                    <div className="header-actions">
+                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Notifications">
+                            <span className="bell-icon">🔔</span>
+                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                                <span className="notification-badge">
+                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                </span>
+                            )}
+                        </div>
+                        <div className="admin-profile">
+                            {adminProfile.image ? (
+                                <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
+                            ) : (
+                                <div className="admin-avatar">AD</div>
+                            )}
+                            <span className="admin-name">{adminProfile.name}</span>
+                        </div>
+                    </div>
                 </div>
-            )}
-        </motion.div>
-    );
+
+                <motion.div
+                    className="recent-orders"
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="show"
+                >
+                    <div className="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Design Info</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredEntries.map((entry) => (
+                                    <tr key={entry.id}>
+                                        <td data-label="Name">{entry.name}</td>
+                                        <td data-label="Contact">
+                                            <div className="cell-content">
+                                                <div style={{ fontWeight: '500' }}>{entry.phone}</div>
+                                                <div style={{ fontSize: '0.85em', color: '#666' }}>{entry.email}</div>
+                                            </div>
+                                        </td>
+                                        <td data-label="Design Info">
+                                            <div className="cell-content">
+                                                <div style={{ fontWeight: 'bold', color: '#be185d' }}>{entry.design_name}</div>
+                                                {entry.selected_sets && <div style={{ fontSize: '0.9em' }}>Sets: {entry.selected_sets}</div>}
+                                            </div>
+                                        </td>
+                                        <td data-label="Message">{entry.message}</td>
+                                        <td data-label="Date">{new Date(entry.created_at).toLocaleDateString('en-IN', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</td>
+                                        <td data-label="Notes">
+                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                {entry.notes ? (
+                                                    <button
+                                                        className="action-btn view-notes-btn"
+                                                        onClick={() => openNotesModal(entry, 'view', 'collection')}
+                                                        title="View Notes"
+                                                    >
+                                                        👁️
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="action-btn edit-notes-btn"
+                                                        onClick={() => openNotesModal(entry, 'edit', 'collection')}
+                                                        title="Add Notes"
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <a
+                                                    href={`tel:${entry.phone}`}
+                                                    className="action-btn call-btn"
+                                                    title="Call"
+                                                >
+                                                    📞
+                                                </a>
+                                                <a
+                                                    href={`mailto:${entry.email}`}
+                                                    className="action-btn email-btn"
+                                                    title="Send Email"
+                                                >
+                                                    ✉️
+                                                </a>
+                                                <button
+                                                    className="action-btn delete-btn"
+                                                    onClick={() => handleDeleteCollectionEntry(entry.id)}
+                                                    title="Delete"
+                                                >
+                                                    🗑
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td data-label="Status">
+                                            <select
+                                                className="status-dropdown"
+                                                value={entry.workflow_status || ''}
+                                                onChange={(e) => handleCollectionWorkflowStatusChange(entry.id, e.target.value)}
+                                            >
+                                                <option value="">Select</option>
+                                                <option value="need_to_call">Need to call</option>
+                                                <option value="need_to_share_pictures">Need to Share the pictures</option>
+                                                <option value="waiting_for_confirmation">Waiting for confirmation</option>
+                                                <option value="approved">Approved</option>
+                                                <option value="rejected">Rejected</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filteredEntries.length === 0 && (
+                                    <tr>
+                                        <td colSpan="8" style={{ textAlign: 'center' }}>No collection enquiries found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </motion.div>
+
+                {/* Export Modal */}
+                {showExportModal && (
+                    <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
+                        <motion.div
+                            className="modal-content export-modal"
+                            onClick={(e) => e.stopPropagation()}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <div className="modal-header">
+                                <h2>Export Collection Enquiries</h2>
+                                <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
+                            </div>
+                            <div className="modal-body">
+                                <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                                    Choose your preferred export format:
+                                </p>
+                                <div className="export-options">
+                                    <button className="export-option-btn excel-btn" onClick={exportToExcel}>
+                                        <span className="export-icon">📊</span>
+                                        <span className="export-label">Excel (.xlsx)</span>
+                                        <span className="export-desc">Best for spreadsheet analysis</span>
+                                    </button>
+                                    <button className="export-option-btn csv-btn" onClick={exportToCSV}>
+                                        <span className="export-icon">📄</span>
+                                        <span className="export-label">CSV (.csv)</span>
+                                        <span className="export-desc">Universal format</span>
+                                    </button>
+                                    <button className="export-option-btn json-btn" onClick={exportToJSON}>
+                                        <span className="export-icon">🔧</span>
+                                        <span className="export-label">JSON (.json)</span>
+                                        <span className="export-desc">For developers</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </motion.div>
+        );
+    };
 
     // Drag and Drop Refs
     const dragItem = useRef(null);
@@ -1275,20 +1619,40 @@ const AdminDashboard = () => {
                         <h1>Dashboard Overview</h1>
                     </div>
                 </div>
+                <div className="header-actions">
+                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                        <span className="bell-icon">🔔</span>
+                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                            <span className="notification-badge">
+                                {contactEntries.filter(entry => entry.status === 'new').length}
+                            </span>
+                        )}
+                    </div>
+                    <div className="admin-profile">
+                        {adminProfile.image ? (
+                            <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
+                        ) : (
+                            <div className="admin-avatar">AD</div>
+                        )}
+                        <span className="admin-name">{adminProfile.name}</span>
+                    </div>
+                </div>
             </div>
             <div className="stats-grid">
                 <div className="stat-card" onClick={() => setActiveTab('contact-inquiries')}>
                     <div className="stat-info">
                         <h3>Contact Enquiries</h3>
-                        <p className="stat-value">{contactEntries.length}</p>
+                        <p className="stat-value">{contactEntries.filter(e => !e.message || !e.message.startsWith('[Collection Enquiry]')).length}</p>
                     </div>
                     <button className="view-more-btn">View More →</button>
                 </div>
-                <div className="stat-card" onClick={() => setActiveTab('collections')}>
+
+                <div className="stat-card" onClick={() => setActiveTab('collection-inquiries')}>
                     <div className="stat-info">
-                        <h3>Collections</h3>
-                        <p className="stat-value">{collections.length}</p>
+                        <h3>Collection Enquiries</h3>
+                        <p className="stat-value">{collectionEntries.length}</p>
                     </div>
+                    <button className="view-more-btn">View More →</button>
                 </div>
             </div>
         </motion.div>
@@ -1315,6 +1679,24 @@ const AdminDashboard = () => {
                     <div className="header-left">
                         <button className="menu-toggle-btn" onClick={toggleSidebar}>☰</button>
                         <div className="header-title"><h1>Collections</h1></div>
+                    </div>
+                    <div className="header-actions">
+                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                            <span className="bell-icon">🔔</span>
+                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                                <span className="notification-badge">
+                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                </span>
+                            )}
+                        </div>
+                        <div className="admin-profile">
+                            {adminProfile.image ? (
+                                <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
+                            ) : (
+                                <div className="admin-avatar">AD</div>
+                            )}
+                            <span className="admin-name">{adminProfile.name}</span>
+                        </div>
                     </div>
                 </div>
                 <div className="admin-card add-image-section">
@@ -1438,13 +1820,68 @@ const AdminDashboard = () => {
                         <div key={d.id} className="admin-gallery-item collection-card">
                             <img src={d.image} alt={d.name} />
                             <div className="design-item-actions">
-                                <div>{d.name} ({d.plate_count} sets)</div>
-                                <button className="btn-delete" onClick={() => handleDeleteDesign(d.id, d.storage_path)}>Delete</button>
+                                <div className="design-info-text">
+                                    <strong>{d.name}</strong>
+                                    <div className="set-count-badge">{d.plate_count} sets</div>
+                                </div>
+                                <div className="action-buttons-row">
+                                    <button className="btn-edit" onClick={() => openEditDesignModal(d)} title="Edit">✏️</button>
+                                    <button className="btn-delete" onClick={() => handleDeleteDesign(d.id, d.storage_path)} title="Delete">🗑️</button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
-            </motion.div>
+
+                {
+                    editDesignModal.isOpen && (
+                        <div className="popup-overlay" onClick={closeEditDesignModal}>
+                            <motion.div className="popup-content" onClick={e => e.stopPropagation()}>
+                                <div className="popup-header"><h3>Edit Design Plate</h3><button className="close-popup-btn" onClick={closeEditDesignModal}>×</button></div>
+                                <div className="popup-body">
+                                    <form onSubmit={handleUpdateDesign} id="edit-design-form" className="popup-form">
+                                        <div className="popup-form-group">
+                                            <label className="popup-label">Name</label>
+                                            <input
+                                                type="text"
+                                                className="popup-input"
+                                                value={editDesignModal.name}
+                                                onChange={e => setEditDesignModal({ ...editDesignModal, name: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="popup-form-group">
+                                            <label className="popup-label">Set Count (e.g. 5, 7)</label>
+                                            <input
+                                                type="text"
+                                                className="popup-input"
+                                                value={editDesignModal.plate_count}
+                                                onChange={e => setEditDesignModal({ ...editDesignModal, plate_count: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="popup-form-group">
+                                            <label className="popup-label">Update Image</label>
+                                            <input
+                                                type="file"
+                                                className="popup-file-input"
+                                                onChange={e => setEditDesignModal({ ...editDesignModal, image: e.target.files[0] })}
+                                                accept="image/*"
+                                            />
+                                            <p className="help-text">Leave empty to keep current image</p>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div className="popup-footer">
+                                    <button type="submit" form="edit-design-form" className="popup-btn-primary" disabled={isSubmittingDesign}>
+                                        {isSubmittingDesign ? 'Updating...' : 'Update Design'}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </motion.div >
         );
     };
 
@@ -1879,6 +2316,8 @@ const AdminDashboard = () => {
                         <span className="nav-icon">📊</span> Dashboard
                     </a>
 
+
+
                     <div
                         className="nav-item-container"
                         onMouseEnter={() => setIsGalleryHovered(true)}
@@ -1936,6 +2375,7 @@ const AdminDashboard = () => {
             <main className="dashboard-main">
                 {activeTab === 'dashboard' && renderDashboardContent()}
                 {activeTab === 'contact-inquiries' && renderContactInquiries()}
+                {activeTab === 'collection-inquiries' && renderCollectionInquiries()}
                 {activeTab === 'gallery' && renderGalleryContent()}
                 {activeTab === 'home-gallery' && renderHomeGalleryContent()}
                 {activeTab === 'collections' && renderCollectionsContent()}

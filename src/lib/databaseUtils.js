@@ -411,3 +411,29 @@ export const deleteDesign = async (id) => {
         return { success: false, error };
     }
 };
+
+/**
+ * Update a design in database
+ * @param {string} id - Design ID
+ * @param {object} updates - Object containing fields to update
+ * @returns {Promise<{success: boolean, data?: object, error?: any}>}
+ */
+export const updateDesign = async (id, updates) => {
+    try {
+        const { data, error } = await supabase
+            .from('designs')
+            .update(updates)
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Update error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data[0] };
+    } catch (error) {
+        console.error('Update error:', error);
+        return { success: false, error };
+    }
+};

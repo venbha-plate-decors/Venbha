@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchCollections, fetchDesigns } from '../lib/databaseUtils';
+
+import { addCollectionEntry } from '../lib/collectionUtils';
 import './Designs.css';
 
 const Designs = () => {
@@ -13,6 +15,11 @@ const Designs = () => {
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [collectionDesigns, setCollectionDesigns] = useState([]);
     const [loadingDesigns, setLoadingDesigns] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [inquiryModal, setInquiryModal] = useState({ isOpen: false, design: null });
+    const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '', selectedSet: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const slugify = (text) => {
         return text
@@ -93,6 +100,62 @@ const Designs = () => {
 
     const handleCollectionClick = (collection) => {
         navigate(`/collections/${slugify(collection.name)}`);
+    };
+
+    const handleOpenInquiry = (design) => {
+        setInquiryModal({ isOpen: true, design });
+
+        setFormData(prev => ({
+            ...prev,
+            selectedSet: '',
+            message: `I am interested in the design "${design.name}". Please share more details.`
+        }));
+    };
+
+    const handleCloseInquiry = () => {
+        setInquiryModal({ isOpen: false, design: null });
+        setFormData({ name: '', phone: '', email: '', message: '', selectedSet: '' });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitInquiry = async (e) => {
+        e.preventDefault();
+        if (!formData.name || !formData.phone) {
+            alert('Please fill in your name and phone number.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const result = await addCollectionEntry({
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                message: formData.message,
+                design_name: inquiryModal.design.name,
+                selected_sets: formData.selectedSet || ''
+            });
+
+            if (result.success) {
+                setShowSuccess(true);
+                // Auto close after 3 seconds or let user close it
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    handleCloseInquiry();
+                }, 3000);
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error submitting form.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const containerVariants = {
@@ -180,12 +243,21 @@ const Designs = () => {
                                                 src={design.image}
                                                 alt={design.name}
                                                 className="design-img"
-                                                onClick={() => window.open(design.image, '_blank')}
+                                                onClick={() => handleOpenInquiry(design)}
                                             />
+                                            <button
+                                                className="zoom-icon-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedImage(design.image);
+                                                }}
+                                                title="Zoom Image"
+                                            >
+                                                🔍
+                                            </button>
                                         </div>
-                                        <div className="design-info">
+                                        <div className="design-info" onClick={() => handleOpenInquiry(design)} style={{ cursor: 'pointer' }}>
                                             <h3>{design.name}</h3>
-
                                         </div>
                                     </motion.div>
                                 ))}
@@ -236,6 +308,157 @@ const Designs = () => {
                     </motion.div>
                 )}
             </div>
+            {/* Lightbox Modal */}
+            {selectedImage && (
+                <div className="lightbox-overlay" onClick={() => setSelectedImage(null)}>
+                    <motion.div
+                        className="lightbox-content"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button className="lightbox-close" onClick={() => setSelectedImage(null)}>×</button>
+                        <img src={selectedImage} alt="Full View" className="lightbox-img" />
+                    </motion.div>
+                </div>
+            )}
+            {/* Inquiry Modal */}
+            {inquiryModal.isOpen && (
+                <div className="lightbox-overlay" onClick={handleCloseInquiry}>
+                    <motion.div
+                        className="inquiry-modal-content"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button className="modal-close-btn" onClick={handleCloseInquiry}>×</button>
+                        <div className="inquiry-form-header">
+                            <h2>Enquire Now</h2>
+                            <p>Interested in <strong>{inquiryModal.design?.name}</strong>?</p>
+
+                            <p style={{ marginTop: '10px' }}>Fill the form below to get a quote.</p>
+                        </div>
+                        <form onSubmit={handleSubmitInquiry}>
+                            <div className="inquiry-form-group">
+                                <label>Name *</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    placeholder="Your Name"
+                                    required
+                                />
+                            </div>
+                            <div className="inquiry-form-group">
+                                <label>Phone Number *</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    placeholder="Your Phone Number"
+                                    required
+                                />
+                            </div>
+                            <div className="inquiry-form-group">
+                                <label>Email (Optional)</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    placeholder="Your Email"
+                                />
+                            </div>
+
+                            {inquiryModal.design?.plate_count && (
+                                <div className="inquiry-form-group">
+                                    <label>Number of Sets</label>
+                                    <select
+                                        name="selectedSet"
+                                        value={formData.selectedSet}
+                                        onChange={handleInputChange}
+                                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '10px', background: '#f9f9f9' }}
+                                    >
+                                        <option value="">Select Sets</option>
+                                        {String(inquiryModal.design.plate_count).split(',').map((opt, idx) => (
+                                            <option key={idx} value={opt.trim()}>{opt.trim()} Sets</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div className="inquiry-form-group">
+                                <label>Message</label>
+                                <textarea
+                                    name="message"
+                                    value={formData.message}
+                                    onChange={handleInputChange}
+                                    placeholder="Any specific requirements?"
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                            <button type="submit" className="btn-submit-inquiry" disabled={isSubmitting}>
+                                {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+                            </button>
+                        </form>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccess && (
+                <div className="lightbox-overlay" style={{ background: 'rgba(0,0,0,0.85)' }}>
+                    <motion.div
+                        className="success-modal"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        style={{
+                            background: 'white',
+                            padding: '40px',
+                            borderRadius: '20px',
+                            textAlign: 'center',
+                            maxWidth: '400px',
+                            width: '90%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '20px',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1, rotate: 360 }}
+                            transition={{ type: 'spring', duration: 0.8 }}
+                            style={{
+                                width: '80px',
+                                height: '80px',
+                                background: '#10B981', // Success Green
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '40px',
+                                color: 'white',
+                                boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
+                            }}
+                        >
+                            ✓
+                        </motion.div>
+                        <div>
+                            <h2 style={{ color: '#333', margin: '0 0 10px 0', fontSize: '24px' }}>Thank You!</h2>
+                            <p style={{ color: '#666', lineHeight: '1.6', margin: 0 }}>
+                                We have received your enquiry. <br /> Our team will contact you shortly!
+                            </p>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };

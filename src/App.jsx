@@ -62,6 +62,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin_dashboard/:tab"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin_dashboard/:tab/:subParam"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Suspense>
       </AuthProvider>

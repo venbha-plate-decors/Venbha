@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, Reorder, useDragControls } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { DownloadIcon } from '@radix-ui/react-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadImageToStorage, deleteImageFromStorage } from '../lib/storageUtils';
 
@@ -58,17 +58,29 @@ const AdminDashboard = () => {
     const { user, signOut, updatePassword } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // Initialize activeTab from localStorage or default to 'dashboard'
-    const [activeTab, setActiveTab] = useState(() => {
-        return localStorage.getItem('adminActiveTab') || 'dashboard';
-    });
+    const { tab, subParam } = useParams();
+    let activeTab = tab || 'dashboard';
+    if (tab === 'collections' && subParam) {
+        activeTab = 'collection-designs';
+    }
+
+    const setActiveTab = (newTab) => {
+        navigate(`/admin_dashboard/${newTab}`);
+    };
 
 
 
-    // Save activeTab to localStorage whenever it changes
+    // Initialize/Sync activeTab with localStorage
     useEffect(() => {
-        localStorage.setItem('adminActiveTab', activeTab);
-    }, [activeTab]);
+        if (!tab) {
+            const saved = localStorage.getItem('adminActiveTab');
+            if (saved && saved !== 'dashboard') {
+                navigate(`/admin_dashboard/${saved}`, { replace: true });
+            }
+        } else {
+            localStorage.setItem('adminActiveTab', tab);
+        }
+    }, [tab, navigate]);
 
     // Gallery State
     const [galleryImages, setGalleryImages] = useState([]);
@@ -79,10 +91,27 @@ const AdminDashboard = () => {
     const [isSubmittingCollection, setIsSubmittingCollection] = useState(false);
 
     // Designs State
-    const [selectedCollection, setSelectedCollection] = useState(null);
+    const [selectedCollection, setSelectedCollection] = useState(() => {
+        try {
+            const saved = localStorage.getItem('adminSelectedCollection');
+            return saved ? JSON.parse(saved) : null;
+        } catch (error) {
+            return null;
+        }
+    });
+
+    useEffect(() => {
+        if (selectedCollection) {
+            localStorage.setItem('adminSelectedCollection', JSON.stringify(selectedCollection));
+        } else {
+            localStorage.removeItem('adminSelectedCollection');
+        }
+    }, [selectedCollection]);
     const [designs, setDesigns] = useState([]);
     const [designForm, setDesignForm] = useState({ name: '', image: null, plate_count: '' });
     const [isSubmittingDesign, setIsSubmittingDesign] = useState(false);
+
+
 
     // Refs
     const collectionImageInputRef = useRef(null);
@@ -495,22 +524,28 @@ const AdminDashboard = () => {
     };
 
     // Design Handlers
-    const handleViewDesigns = async (collection) => {
-        setSelectedCollection(collection);
-        setActiveTab('collection-designs');
-        setDesigns([]); // Clear previous
+    const handleViewDesigns = (collection) => {
+        navigate(`/admin_dashboard/collections/${encodeURIComponent(collection.name)}`);
+    };
 
-        // Fetch designs for this collection
-        setPopupMessage('Loading designs...');
-        setShowPopup(true);
-        const result = await fetchDesigns(collection.id);
-        if (result.success) {
-            setDesigns(result.data);
-            setTimeout(() => setShowPopup(false), 500);
-        } else {
-            setPopupMessage('Failed to load designs.');
+
+    const loadCollectionDesigns = async (collectionId) => {
+        try {
+            const result = await fetchDesigns(collectionId);
+            if (result.success) {
+                setDesigns(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading designs:', error);
         }
     };
+
+    // Ensure designs are loaded when selectedCollection changes and we are in the detail view
+    useEffect(() => {
+        if (activeTab === 'collection-designs' && selectedCollection) {
+            loadCollectionDesigns(selectedCollection.id);
+        }
+    }, [selectedCollection, activeTab]);
 
     const handleAddDesign = async (e) => {
         e.preventDefault();
@@ -535,7 +570,7 @@ const AdminDashboard = () => {
                 name: designForm.name,
                 image: uploadResult.url,
                 storage_path: uploadResult.path,
-                plate_count: parseInt(designForm.plate_count)
+                plate_count: designForm.plate_count // Pass as string
             });
 
             if (!addResult.success) {
@@ -543,8 +578,8 @@ const AdminDashboard = () => {
                 throw new Error(addResult.error.message || 'Database error');
             }
 
-            // Update state
-            setDesigns([addResult.data, ...designs]);
+            // Reload designs from DB to ensure persistence
+            await loadCollectionDesigns(selectedCollection.id);
             setDesignForm({ name: '', image: null, plate_count: '' });
 
             // Reset file input
@@ -1369,39 +1404,49 @@ const AdminDashboard = () => {
         );
     };
 
-    const renderCollectionDesignsContent = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="gallery-manager">
-            <div className="dashboard-header">
-                <div className="header-left">
-                    <button className="menu-toggle-btn" onClick={toggleSidebar}>☰</button>
-                    <div className="header-title">
-                        <button style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', marginRight: '10px' }} onClick={() => setActiveTab('collections')}>Collections &gt;</button>
-                        <h1>{selectedCollection?.name} Designs</h1>
-                    </div>
+    const renderCollectionDesignsContent = () => {
+        if (!selectedCollection) {
+            return (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    Loading collection designs...
                 </div>
-            </div>
-            <div className="admin-card add-image-section">
-                <h3>Add Design Plate</h3>
-                <form onSubmit={handleAddDesign} className="add-image-form">
-                    <div className="form-group"><label>Name</label><input type="text" value={designForm.name} onChange={e => setDesignForm({ ...designForm, name: e.target.value })} required /></div>
-                    <div className="form-group"><label>Set Count</label><input type="number" value={designForm.plate_count} onChange={e => setDesignForm({ ...designForm, plate_count: e.target.value })} required /></div>
-                    <div className="form-group"><label>Image</label><input id="design-image-input" type="file" accept="image/*" onChange={e => setDesignForm({ ...designForm, image: e.target.files[0] })} required /></div>
-                    <button type="submit" className="btn-primary" disabled={isSubmittingDesign}>Add</button>
-                </form>
-            </div>
-            <div className="admin-gallery-grid">
-                {designs.map(d => (
-                    <div key={d.id} className="admin-gallery-item collection-card">
-                        <img src={d.image} alt={d.name} />
-                        <div className="design-item-actions">
-                            <div>{d.name} ({d.plate_count} sets)</div>
-                            <button className="btn-delete" onClick={() => handleDeleteDesign(d.id, d.storage_path)}>Delete</button>
+            );
+        }
+
+        return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="gallery-manager">
+                <div className="dashboard-header">
+                    <div className="header-left">
+                        <button className="menu-toggle-btn" onClick={toggleSidebar}>☰</button>
+                        <div className="header-title">
+                            <button style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', marginRight: '10px' }} onClick={() => setActiveTab('collections')}>Collections &gt;</button>
+                            <h1>{selectedCollection.name} Designs</h1>
                         </div>
                     </div>
-                ))}
-            </div>
-        </motion.div>
-    );
+                </div>
+                <div className="admin-card add-image-section">
+                    <h3>Add Design Plate</h3>
+                    <form onSubmit={handleAddDesign} className="add-image-form">
+                        <div className="form-group"><label>Name</label><input type="text" value={designForm.name} onChange={e => setDesignForm({ ...designForm, name: e.target.value })} required /></div>
+                        <div className="form-group"><label>Set Count (e.g. 5, 7)</label><input type="text" value={designForm.plate_count} onChange={e => setDesignForm({ ...designForm, plate_count: e.target.value })} required /></div>
+                        <div className="form-group"><label>Image</label><input id="design-image-input" type="file" accept="image/*" onChange={e => setDesignForm({ ...designForm, image: e.target.files[0] })} required /></div>
+                        <button type="submit" className="btn-primary" disabled={isSubmittingDesign}>Add</button>
+                    </form>
+                </div>
+                <div className="admin-gallery-grid">
+                    {designs.map(d => (
+                        <div key={d.id} className="admin-gallery-item collection-card">
+                            <img src={d.image} alt={d.name} />
+                            <div className="design-item-actions">
+                                <div>{d.name} ({d.plate_count} sets)</div>
+                                <button className="btn-delete" onClick={() => handleDeleteDesign(d.id, d.storage_path)}>Delete</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </motion.div>
+        );
+    };
 
     const renderGalleryContent = () => (
         <motion.div
@@ -1791,6 +1836,23 @@ const AdminDashboard = () => {
         </motion.div>
     );
 
+    // Sync selectedCollection from URL param (Moved to bottom to ensure handlers are defined)
+    useEffect(() => {
+        if (tab === 'collections' && subParam && collections.length > 0) {
+            try {
+                const decodedName = decodeURIComponent(subParam);
+                const target = collections.find(c => c.name === decodedName);
+                if (target) {
+                    if (!selectedCollection || selectedCollection.id !== target.id) {
+                        setSelectedCollection(target);
+                    }
+                }
+            } catch (e) {
+                console.error("URL Parameter Error:", e);
+            }
+        }
+    }, [tab, subParam, collections, selectedCollection]);
+
     return (
         <div className={`admin-dashboard ${isSidebarOpen ? 'sidebar-open' : ''}`}>
             <Helmet>
@@ -2008,5 +2070,7 @@ const AdminDashboard = () => {
         </div >
     );
 };
+
+
 
 export default AdminDashboard;

@@ -1530,6 +1530,7 @@ const AdminDashboard = () => {
                                             <div className="cell-content">
                                                 <div style={{ fontWeight: 'bold', color: '#be185d' }}>{entry.design_name}</div>
                                                 {entry.selected_sets && <div style={{ fontSize: '0.9em' }}>Sets: {entry.selected_sets}</div>}
+                                                {entry.event_date && <div style={{ fontSize: '0.9em', color: '#666' }}>Event: {new Date(entry.event_date).toLocaleDateString('en-IN')}</div>}
                                             </div>
                                         </td>
                                         <td data-label="Message">{entry.message}</td>
@@ -1613,45 +1614,47 @@ const AdminDashboard = () => {
                 </motion.div>
 
                 {/* Export Modal */}
-                {showExportModal && (
-                    <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
-                        <motion.div
-                            className="modal-content export-modal"
-                            onClick={(e) => e.stopPropagation()}
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="modal-header">
-                                <h2>Export Collection Enquiries</h2>
-                                <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
-                            </div>
-                            <div className="modal-body">
-                                <p style={{ marginBottom: '1.5rem', color: '#666' }}>
-                                    Choose your preferred export format:
-                                </p>
-                                <div className="export-options">
-                                    <button className="export-option-btn excel-btn" onClick={exportToExcel}>
-                                        <span className="export-icon">📊</span>
-                                        <span className="export-label">Excel (.xlsx)</span>
-                                        <span className="export-desc">Best for spreadsheet analysis</span>
-                                    </button>
-                                    <button className="export-option-btn csv-btn" onClick={exportToCSV}>
-                                        <span className="export-icon">📄</span>
-                                        <span className="export-label">CSV (.csv)</span>
-                                        <span className="export-desc">Universal format</span>
-                                    </button>
-                                    <button className="export-option-btn json-btn" onClick={exportToJSON}>
-                                        <span className="export-icon">🔧</span>
-                                        <span className="export-label">JSON (.json)</span>
-                                        <span className="export-desc">For developers</span>
-                                    </button>
+                {
+                    showExportModal && (
+                        <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
+                            <motion.div
+                                className="modal-content export-modal"
+                                onClick={(e) => e.stopPropagation()}
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <div className="modal-header">
+                                    <h2>Export Collection Enquiries</h2>
+                                    <button className="modal-close" onClick={() => setShowExportModal(false)}>✕</button>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </motion.div>
+                                <div className="modal-body">
+                                    <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                                        Choose your preferred export format:
+                                    </p>
+                                    <div className="export-options">
+                                        <button className="export-option-btn excel-btn" onClick={exportToExcel}>
+                                            <span className="export-icon">📊</span>
+                                            <span className="export-label">Excel (.xlsx)</span>
+                                            <span className="export-desc">Best for spreadsheet analysis</span>
+                                        </button>
+                                        <button className="export-option-btn csv-btn" onClick={exportToCSV}>
+                                            <span className="export-icon">📄</span>
+                                            <span className="export-label">CSV (.csv)</span>
+                                            <span className="export-desc">Universal format</span>
+                                        </button>
+                                        <button className="export-option-btn json-btn" onClick={exportToJSON}>
+                                            <span className="export-icon">🔧</span>
+                                            <span className="export-label">JSON (.json)</span>
+                                            <span className="export-desc">For developers</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </motion.div >
         );
     };
 

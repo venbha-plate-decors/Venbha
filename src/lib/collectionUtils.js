@@ -25,7 +25,7 @@ export const fetchCollectionEntries = async () => {
 
 /**
  * Add a new collection enquiry entry to database and send email notification
- * @param {object} entryData - {name, email, phone, message, design_name, selected_sets}
+ * @param {object} entryData - {name, email, phone, message, design_name, selected_sets, event_date}
  * @returns {Promise<{success: boolean, data?: object, error?: any}>}
  */
 export const addCollectionEntry = async (entryData) => {
@@ -43,6 +43,7 @@ export const addCollectionEntry = async (entryData) => {
                     message: entryData.message,
                     design_name: entryData.design_name,
                     selected_sets: entryData.selected_sets,
+                    event_date: entryData.event_date || null,
                     status: 'new'
                 }
             ])
@@ -62,6 +63,7 @@ export const addCollectionEntry = async (entryData) => {
             emailData.append('name', entryData.name);
             emailData.append('email', entryData.email);
             emailData.append('phone', entryData.phone);
+            emailData.append('event_date', entryData.event_date || 'Not specified');
             emailData.append('design_name', entryData.design_name);
             emailData.append('selected_sets', entryData.selected_sets || 'N/A');
             emailData.append('message', entryData.message);

@@ -17,7 +17,7 @@ const Designs = () => {
     const [loadingDesigns, setLoadingDesigns] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [inquiryModal, setInquiryModal] = useState({ isOpen: false, design: null });
-    const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '', selectedSet: '' });
+    const [formData, setFormData] = useState({ name: '', phone: '', email: '', eventDate: '', message: '', selectedSet: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -114,7 +114,7 @@ const Designs = () => {
 
     const handleCloseInquiry = () => {
         setInquiryModal({ isOpen: false, design: null });
-        setFormData({ name: '', phone: '', email: '', message: '', selectedSet: '' });
+        setFormData({ name: '', phone: '', email: '', eventDate: '', message: '', selectedSet: '' });
     };
 
     const handleInputChange = (e) => {
@@ -124,8 +124,13 @@ const Designs = () => {
 
     const handleSubmitInquiry = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.phone) {
-            alert('Please fill in your name and phone number.');
+        if (!formData.name || !formData.phone || !formData.eventDate) {
+            alert('Please fill in all required fields (Name, Phone, and Event Date).');
+            return;
+        }
+
+        if (inquiryModal.design?.plate_count && !formData.selectedSet) {
+            alert('Please select the number of sets.');
             return;
         }
 
@@ -137,7 +142,8 @@ const Designs = () => {
                 email: formData.email,
                 message: formData.message,
                 design_name: inquiryModal.design.name,
-                selected_sets: formData.selectedSet || ''
+                selected_sets: formData.selectedSet || '',
+                event_date: formData.eventDate
             });
 
             if (result.success) {
@@ -341,47 +347,64 @@ const Designs = () => {
                             <p style={{ marginTop: '10px' }}>Fill the form below to get a quote.</p>
                         </div>
                         <form onSubmit={handleSubmitInquiry}>
-                            <div className="inquiry-form-group">
-                                <label>Name *</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    placeholder="Your Name"
-                                    required
-                                />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="inquiry-form-group">
+                                    <label>Name *</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        placeholder="Your Name"
+                                        required
+                                    />
+                                </div>
+                                <div className="inquiry-form-group">
+                                    <label>Phone Number *</label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        placeholder="Mobile"
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="inquiry-form-group">
-                                <label>Phone Number *</label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    placeholder="Your Phone Number"
-                                    required
-                                />
-                            </div>
-                            <div className="inquiry-form-group">
-                                <label>Email (Optional)</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    placeholder="Your Email"
-                                />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="inquiry-form-group">
+                                    <label>Email (Optional)</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        placeholder="Email"
+                                    />
+                                </div>
+                                <div className="inquiry-form-group">
+                                    <label>Date of Event *</label>
+                                    <input
+                                        type="date"
+                                        name="eventDate"
+                                        value={formData.eventDate}
+                                        onChange={handleInputChange}
+                                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', background: '#f9f9f9', fontFamily: 'inherit', fontSize: '0.9rem' }}
+                                        required
+                                    />
+                                </div>
                             </div>
 
                             {inquiryModal.design?.plate_count && (
                                 <div className="inquiry-form-group">
-                                    <label>Number of Sets</label>
+                                    <label>Number of Sets *</label>
                                     <select
                                         name="selectedSet"
+                                        required
                                         value={formData.selectedSet}
                                         onChange={handleInputChange}
-                                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '10px', background: '#f9f9f9' }}
+                                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', background: '#f9f9f9', fontSize: '0.9rem' }}
                                     >
                                         <option value="">Select Sets</option>
                                         {String(inquiryModal.design.plate_count).split(',').map((opt, idx) => (
@@ -438,20 +461,20 @@ const Designs = () => {
                             style={{
                                 width: '80px',
                                 height: '80px',
-                                background: '#10B981', // Success Green
+                                background: '#c2185b', // Dark Pink
                                 borderRadius: '50%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '40px',
                                 color: 'white',
-                                boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
+                                boxShadow: '0 10px 20px rgba(194, 24, 91, 0.3)'
                             }}
                         >
                             ✓
                         </motion.div>
                         <div>
-                            <h2 style={{ color: '#333', margin: '0 0 10px 0', fontSize: '24px' }}>Thank You!</h2>
+                            <h2 style={{ color: '#c2185b', margin: '0 0 10px 0', fontSize: '24px' }}>Thank You!</h2>
                             <p style={{ color: '#666', lineHeight: '1.6', margin: 0 }}>
                                 We have received your enquiry. <br /> Our team will contact you shortly!
                             </p>

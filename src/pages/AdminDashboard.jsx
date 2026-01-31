@@ -11,7 +11,7 @@ import { uploadImageToStorage, deleteImageFromStorage, uploadVideoToStorage } fr
 
 import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign, updateDesign, fetchGalleryVideos, addGalleryVideo, deleteGalleryVideo, updateGalleryVideosOrder } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
-import { fetchCollectionEntries, updateCollectionWorkflowStatus as updateColStatus, updateCollectionNotes as updateColNotes, deleteCollectionEntry as deleteColEntry } from '../lib/collectionUtils';
+import { fetchCollectionEntries, updateCollectionWorkflowStatus as updateColStatus, updateCollectionNotes as updateColNotes, deleteCollectionEntry as deleteColEntry, updateCollectionStatus } from '../lib/collectionUtils';
 import './AdminDashboard.css';
 import logo from '../assets/venbha_logo_circled.png';
 
@@ -525,6 +525,40 @@ const AdminDashboard = () => {
             await loadContactEntries();
         } catch (error) {
             console.error('Error marking messages as read:', error);
+        }
+    };
+
+    const markAllCollectionAsRead = async () => {
+        try {
+            const newEntries = collectionEntries.filter(entry => entry.status === 'new');
+            for (const entry of newEntries) {
+                await updateCollectionStatus(entry.id, 'read');
+            }
+            if (newEntries.length > 0) {
+                await loadCollectionEntries();
+            }
+        } catch (error) {
+            console.error('Error marking collection entries as read:', error);
+        }
+    };
+
+    // Mark collection entries as read when viewing Collection Inquiries
+    useEffect(() => {
+        if (activeTab === 'collection-inquiries' && collectionEntries.length > 0) {
+            markAllCollectionAsRead();
+        }
+    }, [activeTab, collectionEntries]);
+
+    const handleNotificationClick = () => {
+        const hasNewContact = contactEntries.some(entry => entry.status === 'new');
+        const hasNewCollection = collectionEntries.some(entry => entry.status === 'new');
+
+        if (hasNewContact) {
+            setActiveTab('contact-inquiries');
+        } else if (hasNewCollection) {
+            setActiveTab('collection-inquiries');
+        } else {
+            setActiveTab('contact-inquiries'); // Default
         }
     };
 
@@ -1253,11 +1287,11 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                     <div className="header-actions">
-                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                        <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                             <span className="bell-icon">🔔</span>
-                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                            {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                                 <span className="notification-badge">
-                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                    {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                                 </span>
                             )}
                         </div>
@@ -1443,11 +1477,11 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                     <div className="header-actions">
-                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Notifications">
+                        <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                             <span className="bell-icon">🔔</span>
-                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                            {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                                 <span className="notification-badge">
-                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                    {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                                 </span>
                             )}
                         </div>
@@ -1699,11 +1733,11 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                    <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                         <span className="bell-icon">🔔</span>
-                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                        {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                             <span className="notification-badge">
-                                {contactEntries.filter(entry => entry.status === 'new').length}
+                                {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                             </span>
                         )}
                     </div>
@@ -1760,11 +1794,11 @@ const AdminDashboard = () => {
                         <div className="header-title"><h1>Collections</h1></div>
                     </div>
                     <div className="header-actions">
-                        <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                        <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                             <span className="bell-icon">🔔</span>
-                            {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                            {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                                 <span className="notification-badge">
-                                    {contactEntries.filter(entry => entry.status === 'new').length}
+                                    {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                                 </span>
                             )}
                         </div>
@@ -1884,6 +1918,24 @@ const AdminDashboard = () => {
                             <h1>{selectedCollection.name} Designs</h1>
                         </div>
                     </div>
+                    <div className="header-actions">
+                        <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
+                            <span className="bell-icon">🔔</span>
+                            {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
+                                <span className="notification-badge">
+                                    {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
+                                </span>
+                            )}
+                        </div>
+                        <div className="admin-profile">
+                            {adminProfile.image ? (
+                                <img src={adminProfile.image} alt="Admin" className="admin-avatar-img" />
+                            ) : (
+                                <div className="admin-avatar">AD</div>
+                            )}
+                            <span className="admin-name">{adminProfile.name}</span>
+                        </div>
+                    </div>
                 </div>
                 <div className="admin-card add-image-section">
                     <h3>Add Design Plate</h3>
@@ -1981,11 +2033,11 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                    <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                         <span className="bell-icon">🔔</span>
-                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                        {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                             <span className="notification-badge">
-                                {contactEntries.filter(entry => entry.status === 'new').length}
+                                {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                             </span>
                         )}
                     </div>
@@ -2212,11 +2264,11 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                    <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                         <span className="bell-icon">🔔</span>
-                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                        {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                             <span className="notification-badge">
-                                {contactEntries.filter(entry => entry.status === 'new').length}
+                                {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                             </span>
                         )}
                     </div>
@@ -2314,11 +2366,11 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <div className="notification-bell" onClick={() => setActiveTab('contact-inquiries')} title="Contact Enquiries">
+                    <div className="notification-bell" onClick={handleNotificationClick} title="New Enquiries">
                         <span className="bell-icon">🔔</span>
-                        {contactEntries.filter(entry => entry.status === 'new').length > 0 && (
+                        {(contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length) > 0 && (
                             <span className="notification-badge">
-                                {contactEntries.filter(entry => entry.status === 'new').length}
+                                {contactEntries.filter(entry => entry.status === 'new').length + collectionEntries.filter(entry => entry.status === 'new').length}
                             </span>
                         )}
                     </div>

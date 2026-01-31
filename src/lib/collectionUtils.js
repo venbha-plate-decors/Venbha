@@ -143,6 +143,31 @@ export const updateCollectionWorkflowStatus = async (id, workflowStatus) => {
 };
 
 /**
+ * Update collection entry status (e.g. 'read', 'new')
+ * @param {string} id - Entry ID
+ * @param {string} status - New status
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const updateCollectionStatus = async (id, status) => {
+    try {
+        const { error } = await supabase
+            .from('collection_enquiries')
+            .update({ status: status })
+            .eq('id', id);
+
+        if (error) {
+            console.error('Update status error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Update status error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
  * Delete a collection entry
  * @param {string} id - Entry ID
  * @returns {Promise<{success: boolean, error?: any}>}

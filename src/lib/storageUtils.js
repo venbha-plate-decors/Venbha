@@ -140,6 +140,50 @@ export const deleteImageFromStorage = async (filePath, bucket = 'Gallery') => {
     }
 };
 
+/**
+ * Upload a video to Supabase Storage
+ * @param {File} file - The video file to upload
+ * @param {string} bucket - Storage bucket name
+ * @param {string} folder - Folder path within bucket
+ * @returns {Promise<{success: boolean, url?: string, path?: string, error?: any}>}
+ */
+export const uploadVideoToStorage = async (file, bucket = 'Gallery', folder = 'videos') => {
+    try {
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${folder}/${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: file.type
+            });
+
+        if (error) {
+            console.error('Upload error:', error);
+            return { success: false, error };
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(filePath);
+
+        return {
+            success: true,
+            url: publicUrl,
+            path: filePath
+        };
+    } catch (error) {
+        console.error('Upload error:', error);
+        return { success: false, error };
+    }
+};
+
 
 
 

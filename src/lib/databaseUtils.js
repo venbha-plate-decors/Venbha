@@ -25,6 +25,30 @@ export const fetchGalleryImages = async () => {
     }
 };
 
+/**
+ * Fetch all gallery videos from database
+ * @returns {Promise<{success: boolean, data?: array, error?: any}>}
+ */
+export const fetchGalleryVideos = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('gallery_videos')
+            .select('*')
+            .order('display_order', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Fetch error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data || [] };
+    } catch (error) {
+        console.error('Fetch error:', error);
+        return { success: false, error };
+    }
+};
+
 
 
 /**
@@ -61,6 +85,38 @@ export const addGalleryItem = async (itemData) => {
     }
 };
 
+/**
+ * Add a new gallery video to database
+ * @param {object} itemData - {url, storage_path}
+ * @returns {Promise<{success: boolean, data?: object, error?: any}>}
+ */
+export const addGalleryVideo = async (itemData) => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data, error } = await supabase
+            .from('gallery_videos')
+            .insert([
+                {
+                    url: itemData.url,
+                    storage_path: itemData.storage_path,
+                    user_id: user?.id
+                }
+            ])
+            .select();
+
+        if (error) {
+            console.error('Insert error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data: data[0] };
+    } catch (error) {
+        console.error('Insert error:', error);
+        return { success: false, error };
+    }
+};
+
 
 
 /**
@@ -72,6 +128,30 @@ export const deleteGalleryItem = async (id) => {
     try {
         const { error } = await supabase
             .from('gallery_images')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Delete error:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Delete a gallery video from database
+ * @param {string} id - Item ID
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const deleteGalleryVideo = async (id) => {
+    try {
+        const { error } = await supabase
+            .from('gallery_videos')
             .delete()
             .eq('id', id);
 
@@ -198,6 +278,22 @@ export const updateGalleryOrder = async (items) => {
  * @param {Array} items - Array of {id, display_order}
  * @returns {Promise<{success: boolean, error?: any}>}
  */
+export const updateGalleryVideosOrder = async (items) => {
+    try {
+        const updates = items.map((item, index) =>
+            supabase
+                .from('gallery_videos')
+                .update({ display_order: items.length - index })
+                .eq('id', item.id)
+        );
+
+        await Promise.all(updates);
+        return { success: true };
+    } catch (error) {
+        console.error('Update order error:', error);
+        return { success: false, error };
+    }
+};
 
 
 /**

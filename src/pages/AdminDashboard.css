@@ -1349,6 +1349,75 @@ td[data-label="Message"] {
     z-index: 2;
 }
 
+.video-controls {
+    justify-content: center;
+    gap: 10px;
+}
+
+.admin-gallery-item.video-card {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.admin-gallery-item.video-card .item-actions.video-controls {
+    position: relative;
+    background: linear-gradient(to top, #333, #111);
+    opacity: 1;
+}
+
+.video-btn-move {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: #000;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+    font-size: 1rem;
+}
+
+.video-btn-move:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.video-btn-delete {
+    width: auto;
+    padding: 5px 15px;
+    font-size: 0.85rem;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .video-controls {
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.9);
+    }
+
+    .video-btn-move {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .video-btn-delete {
+        padding: 8px 16px;
+        font-size: 0.95rem;
+    }
+}
+
 /* Collection Item Actions Structure */
 .collection-info-group {
     display: flex;

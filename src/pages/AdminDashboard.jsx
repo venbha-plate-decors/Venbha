@@ -4,12 +4,12 @@ import { Helmet } from 'react-helmet-async';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadImageToStorage, deleteImageFromStorage } from '../lib/storageUtils';
+import { uploadImageToStorage, deleteImageFromStorage, uploadVideoToStorage } from '../lib/storageUtils';
 
 // ... (existing code)
 
 
-import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign, updateDesign } from '../lib/databaseUtils';
+import { fetchGalleryImages, fetchHomeGalleryImages, addGalleryItem, deleteGalleryItem, addHomeGalleryImage, deleteHomeGalleryImage, updateGalleryOrder, updateHomeGalleryOrder, fetchCollections, addCollection, deleteCollection, updateCollection, fetchDesigns, addDesign, deleteDesign, updateDesign, fetchGalleryVideos, addGalleryVideo, deleteGalleryVideo, updateGalleryVideosOrder } from '../lib/databaseUtils';
 import { fetchContactEntries, updateContactStatus, updateContactNotes, deleteContactEntry, updateContactWorkflowStatus } from '../lib/contactUtils';
 import { fetchCollectionEntries, updateCollectionWorkflowStatus as updateColStatus, updateCollectionNotes as updateColNotes, deleteCollectionEntry as deleteColEntry } from '../lib/collectionUtils';
 import './AdminDashboard.css';
@@ -87,6 +87,7 @@ const AdminDashboard = () => {
     const [galleryImages, setGalleryImages] = useState([]);
     const [homeGalleryImages, setHomeGalleryImages] = useState([]);
     const [galleryVideos, setGalleryVideos] = useState([]); // Add this line
+    const [galleryTab, setGalleryTab] = useState('photos');
     const [collections, setCollections] = useState([]);
     const [collectionForm, setCollectionForm] = useState({ name: '', image: null });
     const [isSubmittingCollection, setIsSubmittingCollection] = useState(false);
@@ -471,6 +472,12 @@ const AdminDashboard = () => {
                 setHomeGalleryImages(homeResult.data);
             }
 
+            // Load gallery videos
+            const videosResult = await fetchGalleryVideos();
+            if (videosResult.success) {
+                setGalleryVideos(videosResult.data);
+            }
+
             // Load collections
             const collectionsResult = await fetchCollections();
             if (collectionsResult.success) {
@@ -796,28 +803,96 @@ const AdminDashboard = () => {
         setShowDeleteConfirm(true);
     };
 
+    const handleAddVideo = async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('video-upload');
+        const files = Array.from(fileInput.files);
+
+        if (files.length === 0) return;
+
+        setPopupMessage('Uploading videos... Please wait.');
+        setShowPopup(true);
+
+        try {
+            // Validate file sizes (e.g. 50MB limit for videos)
+            const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
+            for (const file of files) {
+                if (file.size > MAX_VIDEO_SIZE) {
+                    throw new Error(`Video "${file.name}" is too large. Maximum size is 50MB.`);
+                }
+            }
+
+            const uploadPromises = files.map(async (file) => {
+                // Upload video
+                const uploadResult = await uploadVideoToStorage(file, 'Gallery', 'videos');
+
+                if (!uploadResult.success) {
+                    throw new Error(uploadResult.error.message || 'Upload failed');
+                }
+
+                // Add to database
+                const dbResult = await addGalleryVideo({
+                    url: uploadResult.url,
+                    storage_path: uploadResult.path
+                });
+
+                if (!dbResult.success) {
+                    await deleteImageFromStorage(uploadResult.path, 'Gallery'); // Reuse delete function as it works for any file path handle
+                    throw new Error(dbResult.error.message || 'Database error');
+                }
+
+                return dbResult.data;
+            });
+
+            const newItems = await Promise.all(uploadPromises);
+            setGalleryVideos([...newItems, ...galleryVideos]);
+            window.dispatchEvent(new Event('galleryUpdated'));
+
+            setPopupMessage(`Successfully uploaded ${files.length} video(s)!`);
+            setTimeout(() => setShowPopup(false), 2000);
+            fileInput.value = '';
+        } catch (error) {
+            console.error("Upload error:", error);
+            setPopupMessage(`Error: ${error.message || 'Failed to upload videos'}`);
+        }
+    };
+
     const confirmDelete = async () => {
         if (!deleteItem) return;
 
         try {
             if (deleteItem.handler === 'media') {
-                // Delete from database
-                const dbResult = await deleteGalleryItem(deleteItem.id);
+                if (deleteItem.type === 'video') {
+                    // Delete video
+                    const dbResult = await deleteGalleryVideo(deleteItem.id);
+                    if (!dbResult.success) throw new Error('Failed to delete from database');
 
-                if (!dbResult.success) {
-                    throw new Error('Failed to delete from database');
+                    if (deleteItem.storagePath) {
+                        await deleteImageFromStorage(deleteItem.storagePath);
+                    }
+
+                    setGalleryVideos(galleryVideos.filter(vid => vid.id !== deleteItem.id));
+                    setPopupMessage('Video deleted successfully!');
+                } else {
+                    // Delete image
+                    const dbResult = await deleteGalleryItem(deleteItem.id);
+
+                    if (!dbResult.success) {
+                        throw new Error('Failed to delete from database');
+                    }
+
+                    // Delete from storage
+                    if (deleteItem.storagePath) {
+                        await deleteImageFromStorage(deleteItem.storagePath);
+                    }
+
+                    // Update state
+                    setGalleryImages(galleryImages.filter(img => img.id !== deleteItem.id));
+                    setPopupMessage('Item deleted successfully!');
                 }
-
-                // Delete from storage
-                if (deleteItem.storagePath) {
-                    await deleteImageFromStorage(deleteItem.storagePath);
-                }
-
-                // Update state
-                setGalleryImages(galleryImages.filter(img => img.id !== deleteItem.id));
 
                 window.dispatchEvent(new Event('galleryUpdated'));
-                setPopupMessage('Item deleted successfully!');
                 setShowPopup(true);
                 setTimeout(() => setShowPopup(false), 2000);
             } else if (deleteItem.handler === 'home') {
@@ -987,6 +1062,10 @@ const AdminDashboard = () => {
             items = [...homeGalleryImages];
             setItems = setHomeGalleryImages;
             updateDb = updateHomeGalleryOrder;
+        } else if (listType === 'video') {
+            items = [...galleryVideos];
+            setItems = setGalleryVideos;
+            updateDb = updateGalleryVideosOrder;
         }
 
         const newIndex = index + direction;
@@ -1921,111 +2000,198 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-
+            {/* Sub-tabs for Gallery */}
+            <div className="tab-navigation" style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                <button
+                    className={`tab-btn ${galleryTab === 'photos' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('photos')}
+                    style={{ padding: '10px 20px', cursor: 'pointer', borderRadius: '5px', border: 'none', background: galleryTab === 'photos' ? '#c2185b' : '#eee', color: galleryTab === 'photos' ? 'white' : 'black' }}
+                >
+                    Photos
+                </button>
+                <button
+                    className={`tab-btn ${galleryTab === 'videos' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('videos')}
+                    style={{ padding: '10px 20px', cursor: 'pointer', borderRadius: '5px', border: 'none', background: galleryTab === 'videos' ? '#c2185b' : '#eee', color: galleryTab === 'videos' ? 'white' : 'black' }}
+                >
+                    Videos
+                </button>
+            </div>
 
             {/* Photos Section */}
-            <div className="admin-card add-image-section">
-                <h3>Add New Photos</h3>
-                <form onSubmit={handleAddMedia} className="add-image-form">
-                    <div className="form-group">
-                        <label>Upload Photos (Multiple allowed)</label>
-                        <input
-                            id="media-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            required
-                        />
+            {galleryTab === 'photos' && (
+                <>
+                    <div className="admin-card add-image-section">
+                        <h3>Add New Photos</h3>
+                        <form onSubmit={handleAddMedia} className="add-image-form">
+                            <div className="form-group">
+                                <label>Upload Photos (Multiple allowed)</label>
+                                <input
+                                    id="media-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary">
+                                Add Photos
+                            </button>
+                        </form>
                     </div>
-                    <button type="submit" className="btn-primary">
-                        Add Photos
-                    </button>
-                </form>
-            </div>
 
-            <div className="media-section-header">
-                <h3>Photos ({galleryImages.length})</h3>
-            </div>
-            <Reorder.Group
-                axis="y"
-                values={galleryImages}
-                onReorder={(newOrder) => {
-                    setGalleryImages(newOrder);
-                    updateGalleryOrder(newOrder);
-                }}
-                className="admin-gallery-grid"
-                style={{ listStyle: 'none', padding: 0 }}
-            >
-                {galleryImages.map((img, index) => (
-                    <SortableGalleryItem
-                        key={img.id}
-                        item={img}
-                        className="admin-gallery-item"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileDrag={{ scale: 1.1, zIndex: 10, cursor: 'grabbing' }}
+                    <div className="media-section-header">
+                        <h3>Photos ({galleryImages.length})</h3>
+                    </div>
+                    <Reorder.Group
+                        axis="y"
+                        values={galleryImages}
+                        onReorder={(newOrder) => {
+                            setGalleryImages(newOrder);
+                            updateGalleryOrder(newOrder);
+                        }}
+                        className="admin-gallery-grid"
+                        style={{ listStyle: 'none', padding: 0 }}
                     >
-                        <img src={img.url || img.src} alt="Gallery" />
-                        <div className="item-actions">
-                            <button
-                                className="btn-move"
-                                title="Move Backward"
-                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
-                                disabled={index === 0}
-                                style={{ opacity: index === 0 ? 0.5 : 1, cursor: index === 0 ? 'not-allowed' : 'pointer' }}
+                        {galleryImages.map((img, index) => (
+                            <SortableGalleryItem
+                                key={img.id}
+                                item={img}
+                                className="admin-gallery-item"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                whileHover={{ scale: 1.02 }}
+                                whileDrag={{ scale: 1.1, zIndex: 10, cursor: 'grabbing' }}
                             >
-                                ←
+                                <img src={img.url || img.src} alt="Gallery" />
+                                <div className="item-actions">
+                                    <button
+                                        className="btn-move"
+                                        title="Move Backward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
+                                        disabled={index === 0}
+                                        style={{ opacity: index === 0 ? 0.5 : 1, cursor: index === 0 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        ←
+                                    </button>
+                                    <button
+                                        className="btn-move"
+                                        title="Move Forward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
+                                        disabled={index === galleryImages.length - 1}
+                                        style={{ opacity: index === galleryImages.length - 1 ? 0.5 : 1, cursor: index === galleryImages.length - 1 ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        →
+                                    </button>
+                                    <button
+                                        className="btn-download"
+                                        title="Download"
+                                        onClick={() => handleDownload(img.url || img.src, `gallery-${img.id}.png`)}
+                                    >
+                                        <DownloadIcon width={18} height={18} />
+                                    </button>
+                                    <button
+                                        className="btn-delete"
+                                        onClick={() => handleDeleteMedia(img.id, 'image', img.storage_path)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                                <div className="mobile-reorder-controls">
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mobile-reorder-btn"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
+                                    >
+                                        ↓
+                                    </button>
+                                </div>
+                            </SortableGalleryItem>
+                        ))}
+                        {galleryImages.length === 0 && (
+                            <p className="no-images">No photos in gallery.</p>
+                        )}
+                    </Reorder.Group>
+
+                </>
+            )}
+
+            {/* Videos Section */}
+            {galleryTab === 'videos' && (
+                <>
+                    <div className="admin-card add-image-section">
+                        <h3>Add New Videos</h3>
+                        <form onSubmit={handleAddVideo} className="add-image-form">
+                            <div className="form-group">
+                                <label>Upload Videos (Multiple allowed, Max 50MB each)</label>
+                                <input
+                                    id="video-upload"
+                                    type="file"
+                                    accept="video/*"
+                                    multiple
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary">
+                                Add Videos
                             </button>
-                            <button
-                                className="btn-move"
-                                title="Move Forward"
-                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
-                                disabled={index === galleryImages.length - 1}
-                                style={{ opacity: index === galleryImages.length - 1 ? 0.5 : 1, cursor: index === galleryImages.length - 1 ? 'not-allowed' : 'pointer' }}
-                            >
-                                →
-                            </button>
-                            <button
-                                className="btn-download"
-                                title="Download"
-                                onClick={() => handleDownload(img.url || img.src, `gallery-${img.id}.png`)}
-                            >
-                                <DownloadIcon width={18} height={18} />
-                            </button>
-                            <button
-                                className="btn-delete"
-                                onClick={() => handleDeleteMedia(img.id, 'image', img.storage_path)}
-                            >
-                                Delete
-                            </button>
-                        </div>
-                        <div className="mobile-reorder-controls">
-                            <button
-                                type="button"
-                                className="mobile-reorder-btn"
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onTouchStart={(e) => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'image'); }}
-                            >
-                                ↑
-                            </button>
-                            <button
-                                type="button"
-                                className="mobile-reorder-btn"
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onTouchStart={(e) => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'image'); }}
-                            >
-                                ↓
-                            </button>
-                        </div>
-                    </SortableGalleryItem>
-                ))}
-                {galleryImages.length === 0 && (
-                    <p className="no-images">No photos in gallery.</p>
-                )}
-            </Reorder.Group>
+                        </form>
+                    </div>
+
+                    <div className="media-section-header">
+                        <h3>Videos ({galleryVideos.length})</h3>
+                    </div>
+                    <div className="admin-gallery-grid">
+                        {galleryVideos.map((video, index) => (
+                            <div key={video.id} className="admin-gallery-item video-card">
+                                <video
+                                    src={video.url}
+                                    controls
+                                    style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px 8px 0 0' }}
+                                />
+                                <div className="item-actions video-controls">
+                                    <button
+                                        className="video-btn-move"
+                                        title="Move Backward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, -1, 'video'); }}
+                                        disabled={index === 0}
+                                    >
+                                        ←
+                                    </button>
+                                    <button
+                                        className="video-btn-move"
+                                        title="Move Forward"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveItem(index, 1, 'video'); }}
+                                        disabled={index === galleryVideos.length - 1}
+                                    >
+                                        →
+                                    </button>
+                                    <button
+                                        className="video-btn-delete"
+                                        onClick={() => handleDeleteMedia(video.id, 'video', video.storage_path)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {galleryVideos.length === 0 && (
+                        <p className="no-images">No videos in gallery.</p>
+                    )}
+                </>
+            )}
         </motion.div>
     );
 
